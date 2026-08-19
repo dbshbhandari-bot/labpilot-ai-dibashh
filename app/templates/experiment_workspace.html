@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>{{ experiment }}</h1>
+
+<p>
+    Experiment Area: {{ area|title }}
+</p>
+<div class="experiment-planner-card">
+
+    <h2>Experiment Planning</h2>
+
+    <form action="/experiment-planner/save" method="POST">
+
+        <input type="hidden" name="area" value="{{ area }}">
+        <input type="hidden" name="experiment" value="{{ experiment }}">
+
+        <label>Research Question</label>
+        <textarea
+            name="research_question"
+            placeholder="What are you trying to investigate?"
+            required>
+        </textarea>
+
+        <label>Hypothesis</label>
+        <textarea
+            name="hypothesis"
+            placeholder="What do you expect to happen?"
+            required>
+        </textarea>
+
+        <label>Independent Variable</label>
+        <input
+            type="text"
+            name="independent_variable"
+            placeholder="What will you change?"
+            required
+        >
+
+        <label>Dependent Variable</label>
+        <input
+            type="text"
+            name="dependent_variable"
+            placeholder="What will you measure?"
+            required
+        >
+
+        <label>Controls</label>
+        <textarea
+            name="controls"
+            placeholder="What conditions will remain controlled?"
+            required>
+        </textarea>
+
+        <label>Additional Notes</label>
+        <textarea
+            name="notes"
+            placeholder="Add experiment notes...">
+        </textarea>
+
+        <button type="submit">
+            Save Experiment
+        </button>
+
+    </form>
+
+</div>
+{% endblock %}

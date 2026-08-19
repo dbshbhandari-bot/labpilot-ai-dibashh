@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Experiment Planner</h1>
+
+<p>
+    Plan and organise biology and chemistry experiments with LabPilot AI.
+</p>
+<div class="experiment-planner-card">
+
+    <h2>Create New Experiment</h2>
+
+    <form action="/experiment-planner/start" method="GET">
+
+
+        <label>Experiment Area</label>
+
+        <select id="experimentArea" name="area">
+            <option value="biology">Biology</option>
+            <option value="chemistry">Chemistry</option>
+        </select>
+
+        <label>Experiment Type</label>
+
+        <select id="experimentType" name="experiment">
+        </select>
+
+        <button type="submit">
+            Start Experiment
+        </button>
+
+    </form>
+
+</div>
+
+
+<script>
+    const experimentArea = document.getElementById("experimentArea");
+    const experimentType = document.getElementById("experimentType");
+
+    const experiments = {
+        biology: [
+            "Serial Dilution & CFU Analysis",
+            "Antibiotic Susceptibility Testing",
+            "Bacterial Growth Analysis",
+            "PCR Experiment Planning",
+            "Enzyme Activity Experiment"
+        ],
+
+        chemistry: [
+            "Acid-Base Titration",
+            "Solution Preparation & Dilution",
+            "Spectrophotometry / Beer-Lambert Analysis"
+        ]
+    };
+
+    function updateExperimentTypes() {
+        const selectedArea = experimentArea.value;
+
+        experimentType.innerHTML = "";
+
+        experiments[selectedArea].forEach(function(experiment) {
+
+            const option = document.createElement("option");
+
+            option.textContent = experiment;
+            option.value = experiment;
+
+            experimentType.appendChild(option);
+        });
+    }
+
+    experimentArea.addEventListener("change", updateExperimentTypes);
+
+    updateExperimentTypes();
+</script>
+
+{% endblock %}

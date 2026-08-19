@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Experiment Saved</h1>
+
+<div class="experiment-planner-card">
+
+    <h2>{{ experiment }}</h2>
+
+    <p><strong>Area:</strong> {{ area|title }}</p>
+
+    <p>
+        <strong>Research Question:</strong>
+        {{ research_question }}
+    </p>
+
+    <p>
+        <strong>Hypothesis:</strong>
+        {{ hypothesis }}
+    </p>
+
+    <p>
+        <strong>Independent Variable:</strong>
+        {{ independent_variable }}
+    </p>
+
+    <p>
+        <strong>Dependent Variable:</strong>
+        {{ dependent_variable }}
+    </p>
+
+    <p>
+        <strong>Controls:</strong>
+        {{ controls }}
+    </p>
+
+    <p>
+        <strong>Notes:</strong>
+        {{ notes }}
+    </p>
+
+</div>
+
+{% endblock %}

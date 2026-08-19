@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Edit Serial Dilution Result</h1>
+
+<div class="experiment-planner-card">
+
+    <form
+        action="/serial-dilution-results/{{ result[0] }}/update"
+        method="POST"
+    >
+
+        <label>Colony Count</label>
+        <input
+            type="number"
+            step="any"
+            name="colonies"
+            value="{{ result[2] }}"
+            required
+        >
+
+        <label>Dilution</label>
+        <input
+            type="number"
+            step="any"
+            name="dilution"
+            value="{{ result[3] }}"
+            required
+        >
+
+        <label>Volume Plated (mL)</label>
+        <input
+            type="number"
+            step="any"
+            name="volume_ml"
+            value="{{ result[4] }}"
+            required
+        >
+
+        <button type="submit">
+            Update Result
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Serial Dilution & CFU Analysis</h1>
+
+<p>
+    Enter your observed experimental values to calculate CFU/mL.
+</p>
+
+<div class="experiment-planner-card">
+
+    <form method="POST">
+
+        <label>Colony Count</label>
+        <input
+            type="number"
+            name="colonies"
+            step="any"
+            required
+        >
+
+        <label>Dilution</label>
+        <input
+            type="number"
+            name="dilution"
+            step="any"
+            placeholder="Example: 0.0001"
+            required
+        >
+
+        <label>Volume Plated (mL)</label>
+        <input
+            type="number"
+            name="volume_ml"
+            step="any"
+            placeholder="Example: 0.1"
+            required
+        >
+
+        <button type="submit">
+            Calculate CFU
+        </button>
+
+    </form>
+
+    {% if result is not none %}
+
+        <div class="calculation-result">
+
+            <h2>Result</h2>
+
+            <p>
+                {{ "{:,.2f}".format(result) }} CFU/mL
+            </p>
+
+        </div>
+
+    {% endif %}
+
+    {% if error %}
+
+        <p class="error-message">
+            {{ error }}
+        </p>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

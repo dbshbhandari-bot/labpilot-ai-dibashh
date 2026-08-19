@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Edit Experiment</h1>
+
+<div class="experiment-planner-card">
+
+    <form
+        action="/experiments/{{ experiment[0] }}/update"
+        method="POST"
+    >
+
+        <label>Research Question</label>
+        <textarea name="research_question">{{ experiment[3] }}</textarea>
+
+        <label>Hypothesis</label>
+        <textarea name="hypothesis">{{ experiment[4] }}</textarea>
+
+        <label>Independent Variable</label>
+        <input
+            type="text"
+            name="independent_variable"
+            value="{{ experiment[5] }}"
+        >
+
+        <label>Dependent Variable</label>
+        <input
+            type="text"
+            name="dependent_variable"
+            value="{{ experiment[6] }}"
+        >
+
+        <label>Controls</label>
+        <textarea name="controls">{{ experiment[7] }}</textarea>
+
+        <label>Notes</label>
+        <textarea name="notes">{{ experiment[8] }}</textarea>
+
+        <button type="submit">
+            Update Experiment
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Serial Dilution & CFU Analysis</h1>
+
+<p>
+    Enter your experiment information and observed plate data.
+    LabPilot will calculate CFU/mL and save the analysis.
+</p>
+
+<div class="experiment-planner-card">
+
+    <form action="/experiments/serial-dilution/save" method="POST">
+
+        <input type="hidden" name="area" value="biology">
+        <input
+            type="hidden"
+            name="experiment"
+            value="Serial Dilution & CFU Analysis"
+        >
+
+        <h2>Experiment Information</h2>
+
+        <label>Experiment Title</label>
+        <input
+            type="text"
+            name="experiment_title"
+            placeholder="Example: Bacterial concentration analysis"
+            required
+        >
+
+        <label>Aim / Research Question</label>
+        <textarea
+            name="research_question"
+            placeholder="What are you trying to determine?"
+            required
+        ></textarea>
+
+        <label>Sample Name</label>
+        <input
+            type="text"
+            name="sample_name"
+            placeholder="Example: Sample A"
+            required
+        >
+
+        <h2>CFU Analysis</h2>
+
+        <label>Colony Count</label>
+        <input
+            type="number"
+            name="colonies"
+            min="0"
+            step="1"
+            placeholder="Example: 85"
+            required
+        >
+
+        <label>Dilution</label>
+        <input
+            type="number"
+            name="dilution"
+            step="any"
+            min="0"
+            placeholder="Example: 0.0001"
+            required
+        >
+
+        <label>Volume Plated (mL)</label>
+        <input
+            type="number"
+            name="volume_ml"
+            step="any"
+            min="0"
+            placeholder="Example: 0.1"
+            required
+        >
+
+        <label>Notes</label>
+        <textarea
+            name="notes"
+            placeholder="Optional observations or notes"
+        ></textarea>
+
+        <button type="submit">
+            Calculate & Save Experiment
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}

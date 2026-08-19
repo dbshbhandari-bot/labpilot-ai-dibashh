@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Welcome back, Dibash 👋</h1>
+
+<p>AI-powered biological laboratory platform.</p>
+
+<div class="card-container">
+
+    <div class="dashboard-card">
+        <div class="card-icon blue">🧪</div>
+
+        <div>
+            <p class="card-label">Projects</p>
+            <h2>12</h2>
+            <span class="positive-change">↑ 12% this month</span>
+        </div>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="card-icon green">✓</div>
+
+        <div>
+            <p class="card-label">Experiments</p>
+            <h2>24</h2>
+            <span class="positive-change">↑ 5% this month</span>
+        </div>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="card-icon purple">🦠</div>
+
+        <div>
+            <p class="card-label">AMR Predictions</p>
+            <h2>8</h2>
+            <span class="positive-change">↑ 18% this month</span>
+        </div>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="card-icon orange">💊</div>
+
+        <div>
+            <p class="card-label">Drug Candidates</p>
+            <h2>42</h2>
+            <span class="positive-change">↑ 8% this month</span>
+        </div>
+    </div>
+
+</div>
+
+<div class="dashboard-sections">
+
+    <div class="recent-projects">
+
+        <div class="section-header">
+            <h2>Recent Experiments</h2>
+            <a href="#">View all</a>
+        </div>
+
+        <div class="experiment-row">
+            <div>
+                <strong>E. coli antibiotic susceptibility</strong>
+                <p>AMR Testing</p>
+            </div>
+
+            <span class="status completed">Completed</span>
+        </div>
+
+        <div class="experiment-row">
+            <div>
+                <strong>Protein expression analysis</strong>
+                <p>Protein Biology</p>
+            </div>
+
+            <span class="status progress">In Progress</span>
+        </div>
+
+        <div class="experiment-row">
+            <div>
+                <strong>CRISPR gene editing efficiency</strong>
+                <p>Molecular Biology</p>
+            </div>
+
+            <span class="status pending">Pending</span>
+        </div>
+
+    </div>
+
+    <div class="quick-actions">
+
+        <h2>Quick Actions</h2>
+
+        <button>Plan Experiment</button>
+        <button>Run AMR Prediction</button>
+        <button>Upload Lab Image</button>
+        <button>Open Drug Discovery</button>
+
+    </div>
+
+</div>
+
+<div class="chart-section">
+
+    <div class="chart-card">
+        <h2>Experiment Activity</h2>
+        <canvas id="experimentChart"></canvas>
+    </div>
+
+    <div class="chart-card">
+        <h2>Experiment Categories</h2>
+        <canvas id="categoryChart"></canvas>
+    </div>
+
+</div>
+<script>
+    const experimentChart = new Chart(
+        document.getElementById("experimentChart"),
+        {
+            type: "line",
+
+            data: {
+                labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+
+                datasets: [
+                    {
+                        label: "Experiments",
+                        data: [5, 7, 4, 8, 10, 12],
+                        borderColor: "#2563eb",
+                        tension: 0.4
+                    }
+                ]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        }
+    );
+
+    const categoryChart = new Chart(
+        document.getElementById("categoryChart"),
+        {
+            type: "doughnut",
+
+            data: {
+                labels: [
+                    "Microbiology",
+                    "Genetics",
+                    "Drug Discovery",
+                    "Protein"
+                ],
+
+                datasets: [
+                    {
+                        data: [25, 18, 12, 8]
+                    }
+                ]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        }
+    );
+</script>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>My Experiments</h1>
+
+<div class="recent-projects">
+
+    {% if experiments %}
+
+        {% for experiment in experiments %}
+
+        <div class="experiment-row">
+
+            <div>
+                <strong>{{ experiment[2] }}</strong>
+
+                <p>
+                    {{ experiment[1]|title }}
+                    •
+                    {{ experiment[3] }}
+                </p>
+
+                <small>
+                    Created: {{ experiment[4] }}
+                </small>
+            </div>
+
+            <a href="/experiments/{{ experiment[0] }}">
+                View Experiment
+            </a>
+
+        </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <p>No saved experiments yet.</p>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
