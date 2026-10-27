@@ -1,10 +1,16 @@
+
 {% extends "base.html" %}
 
 {% block content %}
 
-<h1>Welcome back, Dibash 👋</h1>
+<h1>Laboratory Overview</h1>
 
-<p>AI-powered biological laboratory platform.</p>
+<p>
+    Welcome to LabPilot AI.
+    Monitor your laboratory research and saved experiments.
+</p>
+
+<!-- LIVE DASHBOARD STATISTICS -->
 
 <div class="card-container">
 
@@ -12,9 +18,9 @@
         <div class="card-icon blue">🧪</div>
 
         <div>
-            <p class="card-label">Projects</p>
-            <h2>12</h2>
-            <span class="positive-change">↑ 12% this month</span>
+            <p class="card-label">Total Experiments</p>
+            <h2>{{ total_experiments }}</h2>
+            <span>Saved laboratory experiments</span>
         </div>
     </div>
 
@@ -22,9 +28,9 @@
         <div class="card-icon green">✓</div>
 
         <div>
-            <p class="card-label">Experiments</p>
-            <h2>24</h2>
-            <span class="positive-change">↑ 5% this month</span>
+            <p class="card-label">Serial Dilution</p>
+            <h2>{{ serial_dilution_count }}</h2>
+            <span>CFU analysis experiments</span>
         </div>
     </div>
 
@@ -32,23 +38,26 @@
         <div class="card-icon purple">🦠</div>
 
         <div>
-            <p class="card-label">AMR Predictions</p>
-            <h2>8</h2>
-            <span class="positive-change">↑ 18% this month</span>
+            <p class="card-label">AST Experiments</p>
+            <h2>{{ ast_count }}</h2>
+            <span>Antibiotic susceptibility testing</span>
         </div>
     </div>
 
     <div class="dashboard-card">
-        <div class="card-icon orange">💊</div>
+        <div class="card-icon orange">📋</div>
 
         <div>
-            <p class="card-label">Drug Candidates</p>
-            <h2>42</h2>
-            <span class="positive-change">↑ 8% this month</span>
+            <p class="card-label">Recent Records</p>
+            <h2>{{ recent_experiments|length }}</h2>
+            <span>Latest saved experiments (up to 5)</span>
         </div>
     </div>
 
 </div>
+
+
+<!-- RECENT EXPERIMENTS AND QUICK ACTIONS -->
 
 <div class="dashboard-sections">
 
@@ -56,88 +65,174 @@
 
         <div class="section-header">
             <h2>Recent Experiments</h2>
-            <a href="#">View all</a>
+
+            <a href="{{ url_for('experiment_planner.my_experiments') }}">
+                View all
+            </a>
         </div>
 
-        <div class="experiment-row">
-            <div>
-                <strong>E. coli antibiotic susceptibility</strong>
-                <p>AMR Testing</p>
-            </div>
+        {% if recent_experiments %}
 
-            <span class="status completed">Completed</span>
-        </div>
+            {% for experiment in recent_experiments %}
 
-        <div class="experiment-row">
-            <div>
-                <strong>Protein expression analysis</strong>
-                <p>Protein Biology</p>
-            </div>
+                <div class="experiment-row">
 
-            <span class="status progress">In Progress</span>
-        </div>
+                    <div>
+                        <strong>
+                            {{ experiment[1] }}
+                        </strong>
 
-        <div class="experiment-row">
-            <div>
-                <strong>CRISPR gene editing efficiency</strong>
-                <p>Molecular Biology</p>
-            </div>
+                        <p>
+                            Experiment #{{ experiment[0] }}
+                        </p>
 
-            <span class="status pending">Pending</span>
-        </div>
+                        <small>
+                            Created: {{ experiment[3] }}
+                        </small>
+                    </div>
+
+                    <div>
+
+                        {% if experiment[1] == "Antibiotic Susceptibility Testing" %}
+
+                            <a href="{{ url_for('experiment_planner.view_ast_experiment', experiment_id=experiment[0]) }}">
+                                Open Experiment
+                            </a>
+
+                        {% elif experiment[1] == "Serial Dilution & CFU Analysis" %}
+
+                            <a href="{{ url_for('experiment_planner.view_experiment', experiment_id=experiment[0]) }}">
+                                Open Experiment
+                            </a>
+
+                        {% else %}
+
+                            <span class="status pending">
+                                Other Experiment
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <p>No experiments have been saved yet.</p>
+
+        {% endif %}
 
     </div>
+
+
+    <!-- WORKING QUICK ACTIONS -->
 
     <div class="quick-actions">
 
         <h2>Quick Actions</h2>
 
-        <button>Plan Experiment</button>
-        <button>Run AMR Prediction</button>
-        <button>Upload Lab Image</button>
-        <button>Open Drug Discovery</button>
+        <a href="{{ url_for('experiment_planner.experiment_planner') }}">
+            <button type="button">Plan New Experiment</button>
+        </a>
+
+        <a href="{{ url_for('experiment_planner.my_experiments') }}">
+            <button type="button">My Experiments</button>
+        </a>
+
+        <a href="{{ url_for('experiment_planner.serial_dilution_calculator') }}">
+            <button type="button">CFU Calculator</button>
+        </a>
 
     </div>
 
 </div>
+
+
+<!-- DATA VISUALISATION -->
 
 <div class="chart-section">
 
     <div class="chart-card">
-        <h2>Experiment Activity</h2>
+
+        <h2>Recent Experiment Activity</h2>
+
         <canvas id="experimentChart"></canvas>
+
     </div>
 
     <div class="chart-card">
-        <h2>Experiment Categories</h2>
+
+        <h2>Experiment Distribution</h2>
+
         <canvas id="categoryChart"></canvas>
+
     </div>
 
 </div>
+
+
 <script>
+
+    // Actual experiment activity from SQLite.
+    const activityLabels = {{ activity_labels | tojson }};
+    const activityData = {{ activity_counts | tojson }};
+
     const experimentChart = new Chart(
         document.getElementById("experimentChart"),
         {
-            type: "line",
+            type: "bar",
 
             data: {
-                labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+                labels: activityLabels,
 
-                datasets: [
-                    {
-                        label: "Experiments",
-                        data: [5, 7, 4, 8, 10, 12],
-                        borderColor: "#2563eb",
-                        tension: 0.4
-                    }
-                ]
+                datasets: [{
+                    label: "Experiments created",
+                    data: activityData,
+                    backgroundColor: "#2563eb",
+                    borderRadius: 5
+                }]
             },
 
             options: {
                 responsive: true,
-                maintainAspectRatio: false
+                maintainAspectRatio: false,
+
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0,
+                            stepSize: 1
+                        }
+                    }
+                },
+
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
             }
         }
+    );
+
+    // Real experiment categories from SQLite
+    const categoryLabels = [
+        "Serial Dilution",
+        "AST Experiments",
+        "Other Experiments"
+    ];
+
+    const totalExperiments = {{ total_experiments | tojson }};
+    const serialDilutionCount = {{ serial_dilution_count | tojson }};
+    const astCount = {{ ast_count | tojson }};
+
+    const otherCount = Math.max(
+        0,
+        totalExperiments - serialDilutionCount - astCount
     );
 
     const categoryChart = new Chart(
@@ -146,18 +241,21 @@
             type: "doughnut",
 
             data: {
-                labels: [
-                    "Microbiology",
-                    "Genetics",
-                    "Drug Discovery",
-                    "Protein"
-                ],
+                labels: categoryLabels,
 
-                datasets: [
-                    {
-                        data: [25, 18, 12, 8]
-                    }
-                ]
+                datasets: [{
+                    data: [
+                        serialDilutionCount,
+                        astCount,
+                        otherCount
+                    ],
+
+                    backgroundColor: [
+                        "#2563eb",
+                        "#16a34a",
+                        "#9333ea"
+                    ]
+                }]
             },
 
             options: {
@@ -166,5 +264,7 @@
             }
         }
     );
+
 </script>
+
 {% endblock %}

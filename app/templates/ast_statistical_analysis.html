@@ -1,0 +1,187 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<div style="max-width: 1000px; margin: 30px auto; padding: 0 15px;">
+
+    <h1>AST Statistical Analysis</h1>
+
+    <p>Experiment #{{ experiment_id }}</p>
+
+    <p>
+        Descriptive statistics for researcher-confirmed
+        comparable replicate measurements.
+    </p>
+
+    {% if results %}
+
+    <h2>Eligible Replicate Groups</h2>
+
+    <div style="overflow-x: auto;">
+
+        <table style="
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        ">
+
+            <thead>
+                <tr style="background-color: #eef2f7;">
+
+                    <th style="padding: 12px; text-align: left;">
+                        Antibiotic
+                    </th>
+
+                    <th style="padding: 12px; text-align: center;">
+                        Replicates
+                    </th>
+
+                    <th style="padding: 12px; text-align: center;">
+                        Mean (mm)
+                    </th>
+
+                    <th style="padding: 12px; text-align: center;">
+                        Standard Deviation (mm)
+                    </th>
+
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for item in results %}
+
+                <tr style="border-bottom: 1px solid #ddd;">
+
+                    <td style="padding: 12px;">
+                        {{ item["antibiotic"] }}
+                    </td>
+
+                    <td style="padding: 12px; text-align: center;">
+                        {{ item["statistics"]["count"] }}
+                    </td>
+
+                    <td style="padding: 12px; text-align: center;">
+                        {{ item["statistics"]["mean"] }}
+                    </td>
+
+                    <td style="padding: 12px; text-align: center;">
+                        {{ item["statistics"]["standard_deviation"] }}
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    {% else %}
+
+    <div style="
+        padding: 16px;
+        margin-top: 20px;
+        background-color: #fff7ed;
+        border: 1px solid #fdba74;
+        border-radius: 8px;
+    ">
+
+        <strong>No eligible replicate groups were found.</strong>
+
+        <p>
+            Review the validation findings below.
+            At least two valid, uniquely numbered,
+            comparable measurements are required.
+        </p>
+
+    </div>
+
+    {% endif %}
+
+    {% if excluded_groups %}
+
+    <h2 style="margin-top: 35px;">
+        Excluded Replicate Groups
+    </h2>
+
+    <p>
+        The following antibiotic groups were excluded
+        from statistical calculations.
+    </p>
+
+    <table style="
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+    ">
+
+        <thead>
+            <tr style="background-color: #fef2f2;">
+
+                <th style="padding: 12px; text-align: left;">
+                    Antibiotic
+                </th>
+
+                <th style="padding: 12px; text-align: left;">
+                    Reason for Exclusion
+                </th>
+
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for group in excluded_groups %}
+
+            <tr style="border-bottom: 1px solid #ddd;">
+
+                <td style="padding: 12px;">
+                    {{ group["antibiotic"] }}
+                </td>
+
+                <td style="
+                    padding: 12px;
+                    color: #b91c1c;
+                ">
+                    {{ group["reason"] }}
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+    {% endif %}
+
+    <p style="
+        margin-top: 30px;
+        padding: 14px;
+        font-size: 13px;
+        color: #555;
+        background-color: #f8fafc;
+        border-radius: 8px;
+    ">
+        <strong>Scientific limitation:</strong>
+        Researcher confirmation is self-reported.
+        Matching disk strengths and replicate identifiers
+        do not independently establish full experimental
+        comparability. These are descriptive statistics only.
+        They do not establish antibiotic susceptibility
+        categories or clinical treatment recommendations.
+    </p>
+
+    <a href="/experiments/ast/{{ experiment_id }}"
+       style="display: inline-block; margin-top: 15px;">
+        ← Back to AST Experiment
+    </a>
+
+</div>
+
+{% endblock %}

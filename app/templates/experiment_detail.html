@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 
 {% block content %}
@@ -6,45 +7,14 @@
 
 <div class="experiment-planner-card">
 
-    <p>
-        <strong>Area:</strong>
-        {{ experiment[1]|title }}
-    </p>
-
-    <p>
-        <strong>Research Question:</strong>
-        {{ experiment[3] }}
-    </p>
-
-    <p>
-        <strong>Hypothesis:</strong>
-        {{ experiment[4] }}
-    </p>
-
-    <p>
-        <strong>Independent Variable:</strong>
-        {{ experiment[5] }}
-    </p>
-
-    <p>
-        <strong>Dependent Variable:</strong>
-        {{ experiment[6] }}
-    </p>
-
-    <p>
-        <strong>Controls:</strong>
-        {{ experiment[7] }}
-    </p>
-
-    <p>
-        <strong>Notes:</strong>
-        {{ experiment[8] }}
-    </p>
-
-    <p>
-        <strong>Created:</strong>
-        {{ experiment[9] }}
-    </p>
+    <p><strong>Area:</strong> {{ experiment[1]|title }}</p>
+    <p><strong>Research Question:</strong> {{ experiment[3] }}</p>
+    <p><strong>Hypothesis:</strong> {{ experiment[4] }}</p>
+    <p><strong>Independent Variable:</strong> {{ experiment[5] }}</p>
+    <p><strong>Dependent Variable:</strong> {{ experiment[6] }}</p>
+    <p><strong>Controls:</strong> {{ experiment[7] }}</p>
+    <p><strong>Notes:</strong> {{ experiment[8] }}</p>
+    <p><strong>Created:</strong> {{ experiment[9] }}</p>
 
     <a href="/experiments/{{ experiment[0] }}/edit">
         Edit Experiment
@@ -55,9 +25,7 @@
         method="POST"
         onsubmit="return confirm('Are you sure you want to delete this experiment?');"
     >
-        <button type="submit">
-            Delete Experiment
-        </button>
+        <button type="submit">Delete Experiment</button>
     </form>
 
 </div>
@@ -71,23 +39,12 @@
 
     <p>
         <strong>Sample:</strong>
-        {{ result[8] if result|length > 8 else "Not recorded" }}
+        {{ result[8] if result|length > 8 and result[8] else "Not recorded" }}
     </p>
 
-    <p>
-        <strong>Colony Count:</strong>
-        {{ result[2] }}
-    </p>
-
-    <p>
-        <strong>Dilution:</strong>
-        {{ result[3] }}
-    </p>
-
-    <p>
-        <strong>Volume Plated:</strong>
-        {{ result[4] }} mL
-    </p>
+    <p><strong>Colony Count:</strong> {{ result[2] }}</p>
+    <p><strong>Dilution:</strong> {{ result[3] }}</p>
+    <p><strong>Volume Plated:</strong> {{ result[4] }} mL</p>
 
     <div class="calculation-result">
 
@@ -103,21 +60,192 @@
 
     </div>
 
+    <div class="calculation-breakdown">
+
+        <h3>Calculation Breakdown</h3>
+
+        <p>
+            <strong>Formula:</strong>
+            CFU/mL = Colony Count ÷ (Dilution × Volume Plated)
+        </p>
+
+        <p>
+            <strong>Your calculation:</strong>
+            {{ result[2] }} ÷ ({{ result[3] }} × {{ result[4] }})
+        </p>
+
+        <p>
+            <strong>Result:</strong>
+            {{ scientific_cfu }} CFU/mL
+        </p>
+
+    </div>
+
     <div class="analysis-box">
 
         <h3>Analysis Summary</h3>
 
-        <p>
-            This result represents the estimated viable microbial
-            concentration in the original sample based on the values
-            entered for colony count, dilution and plated volume.
-        </p>
+        {% for message in analysis %}
+            <p>{{ message }}</p>
+        {% endfor %}
 
     </div>
 
     <a href="/serial-dilution-results/{{ result[0] }}/edit">
         Edit Result
     </a>
+
+</div>
+<div class="experiment-planner-card">
+    <h2>Experiment Report</h2>
+
+    <p>Download your saved measurements as a PDF report.</p>
+
+    <a href="/experiments/{{ experiment[0] }}/report/pdf">
+        Download PDF Report
+    </a>
+</div>
+
+<!-- ALL PLATE RESULTS -->
+
+<div class="experiment-planner-card">
+
+    <h2>All Plate Results</h2>
+
+    <p>
+        Measurements recorded for this experiment.
+    </p>
+
+    {% if all_plates %}
+
+    <div style="overflow-x: auto;">
+
+        <table style="width: 100%; border-collapse: collapse;">
+
+            <thead>
+                <tr>
+                    <th>Plate</th>
+                    <th>Sample</th>
+                    <th>Colonies</th>
+                    <th>Dilution</th>
+                    <th>Volume (mL)</th>
+                    <th>CFU/mL</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for plate in all_plates %}
+
+                <tr>
+                    <td>
+                        {{ plate[9] or "Original Plate" }}
+                    </td>
+
+                    <td>
+                        {{ plate[8] or "Not recorded" }}
+                    </td>
+
+                    <td>{{ plate[2] }}</td>
+
+                    <td>{{ plate[3] }}</td>
+
+                    <td>{{ plate[4] }}</td>
+
+                    <td>
+                        {{ "{:,.2f}".format(plate[5]) }}
+                    </td>
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    {% else %}
+
+        <p>No plate measurements recorded yet.</p>
+
+    {% endif %}
+
+</div>
+
+
+
+<!-- ADD ANOTHER PLATE -->
+
+<div class="experiment-planner-card">
+
+    <h2>Add Another Plate</h2>
+
+    <p>
+        Record an additional plate measurement
+        for this experiment.
+    </p>
+
+    <form
+        action="/experiments/{{ experiment[0] }}/plates/add"
+        method="POST"
+    >
+
+        <label for="plate_label">Plate Label</label>
+        <input
+            type="text"
+            id="plate_label"
+            name="plate_label"
+            placeholder="e.g. Plate 2"
+            required
+        >
+
+        <label for="sample_name">Sample Name</label>
+        <input
+            type="text"
+            id="sample_name"
+            name="sample_name"
+            placeholder="e.g. Sample A"
+        >
+
+        <label for="colonies">Colony Count</label>
+        <input
+            type="number"
+            id="colonies"
+            name="colonies"
+            min="0"
+            step="1"
+            required
+        >
+
+        <label for="dilution">Dilution</label>
+        <input
+            type="number"
+            id="dilution"
+            name="dilution"
+            min="0.000000000001"
+            max="1"
+            step="any"
+            placeholder="e.g. 0.0001"
+            required
+        >
+
+        <label for="volume_ml">Volume Plated (mL)</label>
+        <input
+            type="number"
+            id="volume_ml"
+            name="volume_ml"
+            min="0.000000000001"
+            step="any"
+            placeholder="e.g. 0.1"
+            required
+        >
+
+        <button type="submit">
+            Save Plate
+        </button>
+
+    </form>
 
 </div>
 

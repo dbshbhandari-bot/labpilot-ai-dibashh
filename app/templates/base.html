@@ -1,60 +1,58 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>LabPilot AI</title>
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/main.css') }}">
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/main.css') }}"
+    >
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/sidebar.css') }}">
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/sidebar.css') }}"
+    >
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/dashboard.css') }}"
+    >
 
+    <script
+        src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js">
+    </script>
 
-</head>
-<head>
-    <meta charset="UTF-8">
-    <title>LabPilot AI</title>
-
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/main.css') }}">
-
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/sidebar.css') }}">
-
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/dashboard.css') }}">
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
 </head>
 
 <body>
 
-<div class="container">
+    <div class="container">
 
-    {% include 'sidebar.html' %}
+        {% include 'sidebar.html' %}
 
-    <div class="main-content">
+        <div class="main-content">
 
-        {% include 'topbar.html' %}
+            {% include 'topbar.html' %}
 
-        <div class="page-content">
+            <div class="page-content">
 
-            {% block content %}
-            {% endblock %}
+                {% block content %}
+                {% endblock %}
+
+            </div>
 
         </div>
 
     </div>
-
-</div>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
 
 </body>
 

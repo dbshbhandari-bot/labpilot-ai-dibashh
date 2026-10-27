@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 
 {% block content %}
@@ -26,9 +27,19 @@
                 </small>
             </div>
 
-            <a href="/experiments/{{ experiment[0] }}">
-                View Experiment
-            </a>
+            {% if experiment[2] == "Antibiotic Susceptibility Testing" %}
+
+                <a href="/experiments/ast/{{ experiment[0] }}">
+                    View Experiment
+                </a>
+
+            {% else %}
+
+                <a href="/experiments/{{ experiment[0] }}">
+                    View Experiment
+                </a>
+
+            {% endif %}
 
         </div>
 

@@ -20,3 +20,27 @@ body {
     display: flex;
     flex-direction: column;
 }
+
+/* LabPilot — wider experiment pages */
+
+.main-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.page-content {
+    width: 100%;
+    max-width: none;
+    box-sizing: border-box;
+}
+
+/* Prevent experiment tables from crushing columns */
+.page-content table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.page-content th,
+.page-content td {
+    padding: 12px;
+}

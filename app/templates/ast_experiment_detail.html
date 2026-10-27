@@ -1,0 +1,499 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    .ast-page {
+        width: 100%;
+        max-width: none;
+        box-sizing: border-box;
+    }
+
+    .ast-card {
+        width: 100%;
+        box-sizing: border-box;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 24px;
+        margin: 20px 0;
+    }
+
+    .ast-section {
+        margin-top: 25px;
+        padding: 20px;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+    }
+
+    .ast-table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .ast-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+    }
+
+    .ast-table th,
+    .ast-table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #e2e8f0;
+        vertical-align: top;
+        overflow-wrap: anywhere;
+    }
+
+    .ast-table th {
+        background: #f8fafc;
+    }
+
+    .ast-form {
+        display: grid;
+        gap: 12px;
+        max-width: 650px;
+    }
+
+    .ast-form input,
+    .ast-form select,
+    .ast-form textarea {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+    }
+
+    .ast-button {
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 20px;
+        cursor: pointer;
+        width: fit-content;
+    }
+
+    .ast-button:hover {
+        background: #1d4ed8;
+    }
+
+    .ast-note {
+        font-size: 13px;
+        color: #64748b;
+    }
+
+    .ast-methodology {
+        background: #f8fafc;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 15px 0;
+    }
+
+    @media (max-width: 768px) {
+        .ast-card {
+            padding: 15px;
+        }
+
+        .ast-table {
+            min-width: 700px;
+        }
+    }
+</style>
+
+<div class="ast-page">
+
+    <h1>Antibiotic Susceptibility Testing</h1>
+
+    <p>
+        Saved laboratory experiment #{{ experiment_id }}
+    </p>
+
+<!-- Download AST research report -->
+<div style="margin: 20px 0;">
+    <a
+        href="{{ url_for('experiment_planner.download_ast_report', experiment_id=experiment_id) }}"
+        class="ast-button"
+        style="
+            display: inline-block;
+            padding: 12px 20px;
+            background-color: #17365D;
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+        "
+    >
+        Download PDF Report
+    </a>
+</div>
+
+
+    <!-- SAVED AST MEASUREMENTS -->
+
+    <div class="ast-card">
+
+        <h2>{{ result[1] }}</h2>
+
+        <h3>Antibiotic Measurements</h3>
+
+        <p>
+            Organism: <strong>{{ result[2] }}</strong>
+        </p>
+
+        <p>
+            Sample: <strong>{{ result[3] }}</strong>
+        </p>
+
+        <div class="ast-table-wrapper">
+
+            <table class="ast-table">
+
+                <thead>
+                    <tr>
+                        <th>Antibiotic</th>
+                        <th>Inhibition Zone (mm)</th>
+                        <th>Disk Strength</th>
+                        <th>Replicate</th>
+                        <th>Laboratory Notes</th>
+                        <th>Recorded At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for measurement in all_results %}
+                    <tr>
+                        <td>{{ measurement[4] }}</td>
+                        <td>{{ measurement[5] }}</td>
+                        <td>{{ measurement[10] or "Not recorded" }}</td>
+                        <td>{{ measurement[8] }}</td>
+                        <td>{{ measurement[6] or "No notes" }}</td>
+                        <td>{{ measurement[7] }}</td>
+                        <td>
+                            <a href="/experiments/ast/measurements/{{ measurement[0] }}/edit">
+                                Edit
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <!-- REPLICATE QUALITY CHECKS -->
+
+        <div class="ast-section">
+
+            <h3>Replicate Quality Checks</h3>
+
+            <p>
+                LabPilot checks replicate numbering before
+                statistical analysis.
+            </p>
+
+            <div class="ast-table-wrapper">
+
+                <table class="ast-table">
+
+                    <thead>
+                        <tr>
+                            <th>Antibiotic</th>
+                            <th style="text-align: center;">
+                                Measurements
+                            </th>
+                            <th>Quality Check</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for group in ast_statistics %}
+                        <tr>
+                            <td>{{ group["antibiotic"] }}</td>
+
+                            <td style="text-align: center;">
+                                {{ group["count"] }}
+                            </td>
+
+                            <td>{{ group["status"] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <p class="ast-note">
+                These checks assess replicate numbering only.
+                They do not establish scientific comparability
+                or clinical validity.
+            </p>
+
+        </div>
+
+        <!-- EXPERIMENTAL METHOD DOCUMENTATION -->
+
+        <div class="ast-section">
+
+            <h3>Experimental Method Documentation</h3>
+
+            <div class="ast-methodology">
+
+                <h4>Saved Methodology</h4>
+
+                <p>
+                    <strong>Testing Method:</strong>
+                    {{ result[9] or "Not yet documented" }}
+                </p>
+
+                <p>
+                    <strong>Interpretation Standard:</strong>
+                    {{ result[11] or "Not yet documented" }}
+                </p>
+
+                <p>
+                    <strong>Antibiotic Disk Strength:</strong>
+                    Recorded separately for each AST measurement.
+                    Use the Edit option in the Antibiotic
+                    Measurements table to view or update
+                    individual values.
+                </p>
+
+            </div>
+
+            <p>
+                Record the laboratory conditions used
+                to generate the AST measurements.
+            </p>
+
+            <form
+                action="{{ url_for('experiment_planner.save_ast_methodology', experiment_id=experiment_id) }}"
+                method="POST"
+                class="ast-form"
+            >
+
+                <label for="testing_method">
+                    Testing Method
+                </label>
+
+                <select
+                    id="testing_method"
+                    name="testing_method"
+                    required
+                >
+                    <option value="">
+                        Select testing method
+                    </option>
+
+                    <option value="Disk diffusion"
+                        {% if result[9] == "Disk diffusion" %}selected{% endif %}>
+                        Disk diffusion
+                    </option>
+
+                    <option value="Other"
+                        {% if result[9] == "Other" %}selected{% endif %}>
+                        Other
+                    </option>
+                </select>
+
+                <label for="interpretation_standard">
+                    Interpretation Standard and Version
+                </label>
+
+                <input
+                    type="text"
+                    id="interpretation_standard"
+                    name="interpretation_standard"
+                    value="{{ result[11] or '' }}"
+                    placeholder="e.g. Prototype only — no clinical standard"
+                    required
+                >
+
+                <p class="ast-note">
+                    Testing method and interpretation standard
+                    are currently stored against the first AST
+                    measurement in this prototype. Antibiotic
+                    disk strengths are managed individually
+                    through Edit Measurement.
+                </p>
+
+                <button type="submit" class="ast-button">
+                    Save Methodology
+                </button>
+
+            </form>
+
+            <p class="ast-note">
+                LabPilot does not independently verify
+                laboratory methodology or assign clinical
+                susceptibility categories.
+            </p>
+
+        </div>
+
+        <!-- STATISTICAL ANALYSIS -->
+
+        <div class="ast-section">
+
+            <h3>Statistical Analysis Confirmation</h3>
+
+            <p>
+                Confirm that the replicate measurements
+                were collected under comparable laboratory
+                conditions before requesting statistics.
+            </p>
+
+            <form
+                action="{{ url_for('experiment_planner.analyse_ast_experiment', experiment_id=experiment_id) }}"
+                method="POST"
+            >
+
+                <label style="
+                    display: flex;
+                    gap: 10px;
+                    align-items: flex-start;
+                ">
+
+                    <input
+                        type="checkbox"
+                        name="comparability_confirmed"
+                        value="yes"
+                        required
+                        style="width: auto; margin-top: 4px;"
+                    >
+
+                    <span>
+                        I confirm that the replicate measurements
+                        were collected under comparable laboratory
+                        conditions, including the same organism,
+                        antibiotic, disk strength, test method,
+                        and experimental setup.
+                    </span>
+
+                </label>
+
+                <p class="ast-note">
+                    Confirmation is researcher-provided.
+                    LabPilot does not independently verify
+                    experimental comparability.
+                </p>
+
+                <button type="submit" class="ast-button">
+                    Calculate Statistics
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <!-- ADD ANOTHER ANTIBIOTIC -->
+
+    <div class="ast-card">
+
+        <h2>Add Another Antibiotic</h2>
+
+        <form
+            action="/experiments/ast/{{ experiment_id }}/add"
+            method="POST"
+            class="ast-form"
+        >
+
+            <label for="antibiotic">
+                Antibiotic Name
+            </label>
+
+            <input
+                type="text"
+                id="antibiotic"
+                name="antibiotic"
+                placeholder="e.g. Gentamicin"
+                required
+            >
+
+          <label for="new_disk_strength">
+           Antibiotic Disk Strength
+          </label>
+
+         <label for="new_disk_strength">
+         Antibiotic Disk Strength (µg)
+         </label>
+
+          <input
+          type="number"
+         id="new_disk_strength"
+         name="disk_strength"
+         placeholder="e.g. 10"
+         min="0"
+         step="any"
+         required
+        >
+
+
+
+
+
+
+            <label for="zone_diameter">
+                Inhibition Zone Diameter (mm)
+            </label>
+
+            <input
+                type="number"
+                id="zone_diameter"
+                name="zone_diameter"
+                min="0"
+                step="0.1"
+                required
+            >
+
+            <label for="replicate_number">
+                Replicate Number
+            </label>
+
+            <input
+                type="number"
+                id="replicate_number"
+                name="replicate_number"
+                min="1"
+                step="1"
+                value="1"
+                required
+            >
+
+            <label for="notes">
+                Laboratory Notes
+            </label>
+
+            <textarea
+                id="notes"
+                name="notes"
+                rows="3"
+            ></textarea>
+
+            <button type="submit" class="ast-button">
+                Add Antibiotic Measurement
+            </button>
+
+        </form>
+
+    </div>
+
+    <!-- NAVIGATION -->
+
+    <p>
+        <a href="/experiment-planner">
+            ← Back to Experiment Planner
+        </a>
+    </p>
+
+</div>
+
+{% endblock %}

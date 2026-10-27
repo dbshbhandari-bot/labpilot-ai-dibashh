@@ -1,0 +1,296 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Spectrophotometry & Calibration Analysis</h1>
+
+<p>
+    Experiment 3 — Construct calibration curves
+    and estimate unknown sample concentrations.
+</p>
+
+<div class="experiment-planner-card">
+
+    <h2>Experiment Information</h2>
+
+    <form
+    id="spectrophotometryForm"
+    action="{{ url_for('experiment_planner.analyse_spectrophotometry') }}"
+    method="POST"
+>
+
+{% if error %}
+<div class="experiment-planner-card">
+    <h3>Analysis Error</h3>
+    <p>{{ error }}</p>
+</div>
+{% endif %}
+
+{% if result %}
+
+<div class="experiment-planner-card">
+
+    <h2>Calibration Analysis Results</h2>
+
+    <p>
+        <strong>Slope:</strong>
+        {{ "%.6f"|format(result.slope) }}
+    </p>
+
+    <p>
+        <strong>Intercept:</strong>
+        {{ "%.6f"|format(result.intercept) }}
+    </p>
+
+    <p>
+        <strong>R²:</strong>
+        {{ "%.6f"|format(result.r_squared) }}
+    </p>
+
+    <p>
+        <strong>Estimated Unknown Concentration:</strong>
+        {{ "%.4f"|format(result.unknown_concentration) }}
+        {{ concentration_unit }}
+    </p>
+
+    <p>
+        <strong>Calibration Range:</strong>
+        {{ result.minimum_concentration }}
+        to
+        {{ result.maximum_concentration }}
+        {{ concentration_unit }}
+    </p>
+
+    {% if result.warnings %}
+        <h3>Scientific Warnings</h3>
+
+        <ul>
+            {% for warning in result.warnings %}
+                <li>{{ warning }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+</div>
+
+<div class="experiment-planner-card">
+
+    <h2>Calibration Curve</h2>
+
+    <p>
+        Measured standards compared with the fitted
+        linear regression model.
+    </p>
+
+    <div style="height: 380px; position: relative;">
+        <canvas id="calibrationChart"></canvas>
+    </div>
+
+    <p>
+        <strong>Regression equation:</strong>
+        A = {{ "%.6f"|format(result.slope) }} × C
+        {% if result.intercept >= 0 %}+{% endif %}
+        {{ "%.6f"|format(result.intercept) }}
+    </p>
+
+    <p>
+        <strong>R²:</strong>
+        {{ "%.6f"|format(result.r_squared) }}
+    </p>
+
+</div>
+{% endif %}
+        <label>Experiment Title</label>
+        <input
+            type="text"
+            name="experiment_title"
+            placeholder="e.g. Protein concentration calibration"
+            required
+        >
+
+        <label>Sample Name</label>
+        <input
+            type="text"
+            name="sample_name"
+            placeholder="e.g. Protein solution"
+            required
+        >
+
+        <label>Measurement Wavelength (nm)</label>
+        <input
+            type="number"
+            name="wavelength"
+            min="1"
+            step="any"
+            placeholder="e.g. 595"
+            required
+        >
+
+        <label>Concentration Unit</label>
+        <select name="concentration_unit" required>
+            <option value="mg/mL">mg/mL</option>
+            <option value="µg/mL">µg/mL</option>
+            <option value="mmol/L">mmol/L</option>
+            <option value="mol/L">mol/L</option>
+        </select>
+
+        <h2>Calibration Standards</h2>
+
+        <p>
+            Enter known concentrations and their
+            measured absorbance values.
+        </p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Standard</th>
+                    <th>Concentration</th>
+                    <th>Absorbance (AU)</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for i in range(1, 6) %}
+                <tr>
+                    <td>Standard {{ i }}</td>
+
+                    <td>
+                        <input
+                     type="number"
+                     name="concentration_{{ i }}"
+                     min="0"
+                     step="any"
+                     value="{{ request.form.get('concentration_' ~ i, '') }}"
+                     required
+                     >
+
+                    </td>
+
+                    <td>
+                        <input
+                     type="number"
+                     name="absorbance_{{ i }}"
+                     step="any"
+                     value="{{ request.form.get('absorbance_' ~ i, '') }}"
+                     required
+                     >
+
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h2>Unknown Sample</h2>
+
+        <label>Unknown Sample Absorbance (AU)</label>
+        <input
+          type="number"
+           name="unknown_absorbance"
+          step="any"
+          value="{{ request.form.get('unknown_absorbance', '') }}"
+         required
+        >
+
+        <button type="submit">
+            Analyse Calibration Data
+        </button>
+
+    </form>
+
+</div>
+{% if result %}
+
+<script>
+    // Standard concentrations and measured absorbances.
+    const concentrations = {{ concentrations | tojson }};
+    const absorbances = {{ absorbances | tojson }};
+
+    // Regression results calculated by Python.
+    const slope = {{ result.slope | tojson }};
+    const intercept = {{ result.intercept | tojson }};
+
+    const measuredPoints = concentrations.map(
+        (concentration, index) => ({
+            x: Number(concentration),
+            y: Number(absorbances[index])
+        })
+    );
+
+    // Use the calibration range as the line endpoints.
+    const minimumConcentration = Math.min(
+        ...concentrations.map(Number)
+    );
+
+    const maximumConcentration = Math.max(
+        ...concentrations.map(Number)
+    );
+
+    const fittedLine = [
+        {
+            x: minimumConcentration,
+            y: slope * minimumConcentration + intercept
+        },
+        {
+            x: maximumConcentration,
+            y: slope * maximumConcentration + intercept
+        }
+    ];
+
+    const chartCanvas = document.getElementById(
+        "calibrationChart"
+    );
+
+    if (chartCanvas && typeof Chart !== "undefined") {
+
+        new Chart(chartCanvas, {
+            type: "scatter",
+
+            data: {
+                datasets: [
+                    {
+                        label: "Measured Standards",
+                        data: measuredPoints,
+                        backgroundColor: "#2563eb",
+                        pointRadius: 6
+                    },
+                    {
+                        label: "Fitted Regression Line",
+                        data: fittedLine,
+                        type: "line",
+                        borderColor: "#16a34a",
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        fill: false
+                    }
+                ]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                scales: {
+                    x: {
+                        type: "linear",
+                        title: {
+                            display: true,
+                            text: "Concentration ({{ concentration_unit }})"
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: "Absorbance (AU)"
+                        }
+                    }
+                }
+            }
+        });
+    }
+</script>
+
+{% endif %}
+{% endblock %}
