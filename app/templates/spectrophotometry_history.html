@@ -1,0 +1,134 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Saved Spectrophotometry Experiments</h1>
+
+<p>
+    Review previously saved calibration analyses,
+    reopen their original measurements, and
+    download scientific PDF reports.
+</p>
+
+<div class="experiment-planner-card">
+
+    {% if saved_experiments %}
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Experiment</th>
+                    <th>Sample</th>
+                    <th>Wavelength</th>
+                    <th>Unknown Concentration</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                    <th>PDF Report</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for experiment in saved_experiments %}
+
+                    <tr>
+
+                        <td>
+                            {{ experiment[0] }}
+                        </td>
+
+                        <td>
+                            {{ experiment[1] }}
+                        </td>
+
+                        <td>
+                            {{ experiment[2] }}
+                        </td>
+
+                        <td>
+                            {% if experiment[3] is not none %}
+                                {{ experiment[3] }} nm
+                            {% else %}
+                                Not recorded
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {{ "%.4f"|format(experiment[5]) }}
+
+                            {% if experiment[4] %}
+                                {{ experiment[4] }}
+                            {% else %}
+                                Unit not recorded
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {{ experiment[6] }}
+                        </td>
+
+                        <!-- VIEW SAVED EXPERIMENT -->
+
+                        <td>
+                            <a
+                                href="{{ url_for(
+                                    'experiment_planner.view_spectrophotometry_experiment',
+                                    result_id=experiment[0]
+                                ) }}"
+                                style="
+                                    display: inline-block;
+                                    padding: 9px 14px;
+                                    background-color: #2563eb;
+                                    color: white;
+                                    text-decoration: none;
+                                    border-radius: 6px;
+                                    font-weight: 600;
+                                "
+                            >
+                                View
+                            </a>
+                        </td>
+
+                        <!-- DOWNLOAD PDF REPORT -->
+
+                        <td>
+                            <a
+                                href="{{ url_for(
+                                    'experiment_planner.download_spectrophotometry_report',
+                                    result_id=experiment[0]
+                                ) }}"
+                                style="
+                                    display: inline-block;
+                                    padding: 9px 14px;
+                                    background-color: #17365D;
+                                    color: white;
+                                    text-decoration: none;
+                                    border-radius: 6px;
+                                    font-weight: 600;
+                                    white-space: nowrap;
+                                "
+                            >
+                                Download PDF
+                            </a>
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+        </table>
+
+    {% else %}
+
+        <p>
+            No saved spectrophotometry experiments yet.
+        </p>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

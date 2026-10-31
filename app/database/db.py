@@ -128,10 +128,129 @@ def create_tables():
         """)
 
     if "interpretation_standard" not in ast_columns:
-        cursor.execute("""
-            ALTER TABLE ast_results
-            ADD COLUMN interpretation_standard TEXT
+            cursor.execute("""
+                ALTER TABLE ast_results
+                ADD COLUMN interpretation_standard TEXT
+            """)
+    cursor.execute("""
+            CREATE TABLE IF NOT EXISTS spectrophotometry_results (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                experiment_title TEXT NOT NULL,
+                sample_name TEXT NOT NULL,
+                slope REAL NOT NULL,
+                intercept REAL NOT NULL,
+                r_squared REAL NOT NULL,
+                unknown_absorbance REAL NOT NULL,
+                unknown_concentration REAL NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
         """)
+
+        # Store the original calibration measurements
+    cursor.execute("""
+            CREATE TABLE IF NOT EXISTS spectrophotometry_standards (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                result_id INTEGER NOT NULL,
+                concentration REAL NOT NULL,
+                absorbance REAL NOT NULL,
+                FOREIGN KEY (result_id)
+                    REFERENCES spectrophotometry_results(id)
+            )
+        """)
+
+    # Check existing spectrophotometry columns.
+    cursor.execute("""
+        PRAGMA table_info(spectrophotometry_results)
+    """)
+
+    spectro_columns = {
+        column[1] for column in cursor.fetchall()
+    }
+
+    # Preserve the measurement wavelength.
+    if "wavelength" not in spectro_columns:
+        cursor.execute("""
+            ALTER TABLE spectrophotometry_results
+            ADD COLUMN wavelength REAL
+        """)
+
+    # Preserve the concentration unit.
+    if "concentration_unit" not in spectro_columns:
+        cursor.execute("""
+            ALTER TABLE spectrophotometry_results
+            ADD COLUMN concentration_unit TEXT
+        """)
+
 
     connection.commit()
     connection.close()
+
+
+
+def save_spectrophotometry_result(
+    experiment_title,
+    sample_name,
+    concentrations,
+    absorbances,
+    unknown_absorbance,
+    result,
+    wavelength,
+    concentration_unit
+):
+    connection = get_connection()
+
+    try:
+        cursor = connection.cursor()
+
+        cursor.execute("""
+            INSERT INTO spectrophotometry_results (
+                experiment_title,
+                sample_name,
+                slope,
+                intercept,
+                r_squared,
+                unknown_absorbance,
+                unknown_concentration,
+                wavelength,
+                concentration_unit
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            experiment_title,
+            sample_name,
+            result["slope"],
+            result["intercept"],
+            result["r_squared"],
+            float(unknown_absorbance),
+            result["unknown_concentration"],
+            float(wavelength),
+            concentration_unit
+        ))
+
+        result_id = cursor.lastrowid
+
+        for concentration, absorbance in zip(
+            concentrations, absorbances
+        ):
+            cursor.execute("""
+                INSERT INTO spectrophotometry_standards (
+                    result_id,
+                    concentration,
+                    absorbance
+                )
+                VALUES (?, ?, ?)
+            """, (
+                result_id,
+                float(concentration),
+                float(absorbance)
+            ))
+
+        connection.commit()
+        return result_id
+
+    except Exception:
+        connection.rollback()
+        raise
+
+    finally:
+        connection.close()

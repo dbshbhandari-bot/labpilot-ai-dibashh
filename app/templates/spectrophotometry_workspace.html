@@ -3,29 +3,36 @@
 
 {% block content %}
 
-<h1>Spectrophotometry & Calibration Analysis</h1>
+<h1>Spectrophotometry &amp; Calibration Analysis</h1>
 
 <p>
     Experiment 3 — Construct calibration curves
     and estimate unknown sample concentrations.
 </p>
 
-<div class="experiment-planner-card">
+<!-- SAVED EXPERIMENTS NAVIGATION -->
 
-    <h2>Experiment Information</h2>
+<div style="margin: 20px 0 25px 0;">
 
-    <form
-    id="spectrophotometryForm"
-    action="{{ url_for('experiment_planner.analyse_spectrophotometry') }}"
-    method="POST"
->
+    <a
+        href="{{ url_for('experiment_planner.spectrophotometry_history') }}"
+        style="
+            display: inline-block;
+            padding: 12px 20px;
+            background-color: #2563eb;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+        "
+    >
+        View Saved Experiments
+    </a>
 
-{% if error %}
-<div class="experiment-planner-card">
-    <h3>Analysis Error</h3>
-    <p>{{ error }}</p>
 </div>
-{% endif %}
+
+
+<!-- ANALYSIS RESULTS -->
 
 {% if result %}
 
@@ -51,7 +58,7 @@
     <p>
         <strong>Estimated Unknown Concentration:</strong>
         {{ "%.4f"|format(result.unknown_concentration) }}
-        {{ concentration_unit }}
+        {{ concentration_unit | default('Unit not recorded', true) }}
     </p>
 
     <p>
@@ -59,20 +66,32 @@
         {{ result.minimum_concentration }}
         to
         {{ result.maximum_concentration }}
-        {{ concentration_unit }}
+        {{ concentration_unit | default('Unit not recorded', true) }}
     </p>
-
-    {% if result.warnings %}
+       {% if scientific_warnings %}
+    <div style="
+        padding: 16px;
+        margin-top: 20px;
+        border-left: 4px solid #d97706;
+        background-color: #fffbeb;
+        color: #78350f;
+        border-radius: 6px;
+    ">
         <h3>Scientific Warnings</h3>
 
         <ul>
-            {% for warning in result.warnings %}
+            {% for warning in scientific_warnings %}
                 <li>{{ warning }}</li>
             {% endfor %}
         </ul>
-    {% endif %}
+    </div>
+{% endif %}
+
 
 </div>
+
+
+<!-- CALIBRATION GRAPH -->
 
 <div class="experiment-planner-card">
 
@@ -100,40 +119,128 @@
     </p>
 
 </div>
+
 {% endif %}
-        <label>Experiment Title</label>
+
+
+<!-- EXPERIMENT INPUT FORM -->
+
+<div class="experiment-planner-card">
+
+    <h2>Experiment Information</h2>
+
+    <form
+        id="spectrophotometryForm"
+        action="{{ url_for('experiment_planner.analyse_spectrophotometry') }}"
+        method="POST"
+    >
+
+        {% if error %}
+
+        <div class="experiment-planner-card">
+            <h3>Analysis Error</h3>
+            <p>{{ error }}</p>
+        </div>
+
+        {% endif %}
+
+        <!-- EXPERIMENT TITLE -->
+
+        <label for="experiment_title">
+            Experiment Title
+        </label>
+
         <input
+            id="experiment_title"
             type="text"
             name="experiment_title"
+            value="{{ request.form.get('experiment_title', experiment_title | default('', true)) }}"
             placeholder="e.g. Protein concentration calibration"
             required
         >
 
-        <label>Sample Name</label>
+        <!-- SAMPLE NAME -->
+
+        <label for="sample_name">
+            Sample Name
+        </label>
+
         <input
+            id="sample_name"
             type="text"
             name="sample_name"
+            value="{{ request.form.get('sample_name', sample_name | default('', true)) }}"
             placeholder="e.g. Protein solution"
             required
         >
 
-        <label>Measurement Wavelength (nm)</label>
+        <!-- WAVELENGTH -->
+
+        <label for="wavelength">
+            Measurement Wavelength (nm)
+        </label>
+
         <input
+            id="wavelength"
             type="number"
             name="wavelength"
+            value="{{ request.form.get('wavelength', wavelength if wavelength is defined and wavelength is not none else '') }}"
             min="1"
             step="any"
             placeholder="e.g. 595"
             required
         >
 
-        <label>Concentration Unit</label>
-        <select name="concentration_unit" required>
-            <option value="mg/mL">mg/mL</option>
-            <option value="µg/mL">µg/mL</option>
-            <option value="mmol/L">mmol/L</option>
-            <option value="mol/L">mol/L</option>
+        <!-- CONCENTRATION UNIT -->
+
+        <label for="concentration_unit">
+            Concentration Unit
+        </label>
+
+        {% set selected_unit = request.form.get(
+            'concentration_unit',
+            concentration_unit | default('mg/mL', true)
+        ) %}
+
+        <select
+            id="concentration_unit"
+            name="concentration_unit"
+            required
+        >
+
+            {% if selected_unit not in
+                ['mg/mL', 'µg/mL', 'mmol/L', 'mol/L'] %}
+
+                <option value="" selected disabled>
+                    Unit not recorded — select a unit
+                </option>
+
+            {% endif %}
+
+            <option value="mg/mL"
+                {% if selected_unit == 'mg/mL' %}selected{% endif %}>
+                mg/mL
+            </option>
+
+            <option value="µg/mL"
+                {% if selected_unit == 'µg/mL' %}selected{% endif %}>
+                µg/mL
+            </option>
+
+            <option value="mmol/L"
+                {% if selected_unit == 'mmol/L' %}selected{% endif %}>
+                mmol/L
+            </option>
+
+            <option value="mol/L"
+                {% if selected_unit == 'mol/L' %}selected{% endif %}>
+                mol/L
+            </option>
+
         </select>
+
+
+        <!-- CALIBRATION STANDARDS -->
 
         <h2>Calibration Standards</h2>
 
@@ -143,6 +250,7 @@
         </p>
 
         <table>
+
             <thead>
                 <tr>
                     <th>Standard</th>
@@ -152,63 +260,100 @@
             </thead>
 
             <tbody>
+
                 {% for i in range(1, 6) %}
+
                 <tr>
-                    <td>Standard {{ i }}</td>
 
                     <td>
-                        <input
-                     type="number"
-                     name="concentration_{{ i }}"
-                     min="0"
-                     step="any"
-                     value="{{ request.form.get('concentration_' ~ i, '') }}"
-                     required
-                     >
-
+                        Standard {{ i }}
                     </td>
 
                     <td>
                         <input
-                     type="number"
-                     name="absorbance_{{ i }}"
-                     step="any"
-                     value="{{ request.form.get('absorbance_' ~ i, '') }}"
-                     required
-                     >
-
+                            type="number"
+                            name="concentration_{{ i }}"
+                            min="0"
+                            step="any"
+                            value="{{ request.form.get('concentration_' ~ i, concentrations[i - 1] if concentrations is defined and concentrations|length >= i else '') }}"
+                            required
+                        >
                     </td>
+
+                    <td>
+                        <input
+                            type="number"
+                            name="absorbance_{{ i }}"
+                            step="any"
+                            value="{{ request.form.get('absorbance_' ~ i, absorbances[i - 1] if absorbances is defined and absorbances|length >= i else '') }}"
+                            required
+                        >
+                    </td>
+
                 </tr>
+
                 {% endfor %}
+
             </tbody>
+
         </table>
+
+
+        <!-- UNKNOWN SAMPLE -->
 
         <h2>Unknown Sample</h2>
 
-        <label>Unknown Sample Absorbance (AU)</label>
+        <label for="unknown_absorbance">
+            Unknown Sample Absorbance (AU)
+        </label>
+
         <input
-          type="number"
-           name="unknown_absorbance"
-          step="any"
-          value="{{ request.form.get('unknown_absorbance', '') }}"
-         required
+            id="unknown_absorbance"
+            type="number"
+            name="unknown_absorbance"
+            step="any"
+            value="{{ request.form.get('unknown_absorbance', unknown_absorbance | default('', true)) }}"
+            required
         >
 
-        <button type="submit">
-            Analyse Calibration Data
-        </button>
+
+        <!-- ANALYSE BUTTON -->
+
+        <div style="margin-top: 25px;">
+
+            <button
+                type="submit"
+                style="
+                    display: inline-block;
+                    padding: 12px 22px;
+                    background-color: #2563eb;
+                    color: white;
+                    border: none;
+                    border-radius: 8px;
+                    font-size: 15px;
+                    font-weight: 600;
+                    cursor: pointer;
+                "
+            >
+                Analyse Calibration Data
+            </button>
+
+        </div>
 
     </form>
 
 </div>
+
+
+<!-- CHART.JS CALIBRATION GRAPH -->
+
 {% if result %}
 
 <script>
-    // Standard concentrations and measured absorbances.
+
     const concentrations = {{ concentrations | tojson }};
     const absorbances = {{ absorbances | tojson }};
 
-    // Regression results calculated by Python.
     const slope = {{ result.slope | tojson }};
     const intercept = {{ result.intercept | tojson }};
 
@@ -219,7 +364,6 @@
         })
     );
 
-    // Use the calibration range as the line endpoints.
     const minimumConcentration = Math.min(
         ...concentrations.map(Number)
     );
@@ -246,6 +390,7 @@
     if (chartCanvas && typeof Chart !== "undefined") {
 
         new Chart(chartCanvas, {
+
             type: "scatter",
 
             data: {
@@ -273,24 +418,31 @@
                 maintainAspectRatio: false,
 
                 scales: {
+
                     x: {
                         type: "linear",
                         title: {
                             display: true,
-                            text: "Concentration ({{ concentration_unit }})"
+                            text: "Concentration ({{ concentration_unit | default('Unit not recorded', true) }})"
                         }
                     },
+
                     y: {
                         title: {
                             display: true,
                             text: "Absorbance (AU)"
                         }
                     }
+
                 }
             }
+
         });
+
     }
+
 </script>
 
 {% endif %}
+
 {% endblock %}

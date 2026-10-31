@@ -3,7 +3,17 @@ from app.database.db import get_connection
 from app.services.ast_analysis import analyse_ast_replicates
 from app.services.serial_dilution import calculate_cfu, analyse_cfu
 from io import BytesIO
+from app.services.spectrophotometry_report import validate_calibration_report
+
+import sqlite3
+
+
 from flask import send_file
+from app.services.spectrophotometry_report import generate_spectrophotometry_pdf
+
+
+from app.database.db import save_spectrophotometry_result
+
 from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 )
@@ -311,6 +321,107 @@ def view_ast_experiment(experiment_id):
         all_results=all_results,
         ast_statistics=ast_statistics
     )
+
+@experiment_planner_bp.route(
+    "/experiments/spectrophotometry/<int:result_id>"
+)
+def view_spectrophotometry_experiment(result_id):
+
+    connection = get_connection()
+
+    try:
+        cursor = connection.cursor()
+
+        cursor.execute("""
+            SELECT
+                id,
+                experiment_title,
+                sample_name,
+                slope,
+                intercept,
+                r_squared,
+                unknown_absorbance,
+                unknown_concentration,
+                created_at,
+                wavelength,
+                concentration_unit
+            FROM spectrophotometry_results
+            WHERE id = ?
+        """, (result_id,))
+
+        saved_result = cursor.fetchone()
+
+        if saved_result is None:
+            return "Spectrophotometry experiment not found.", 404
+
+        cursor.execute("""
+            SELECT concentration, absorbance
+            FROM spectrophotometry_standards
+            WHERE result_id = ?
+            ORDER BY id ASC
+        """, (result_id,))
+
+        standards = cursor.fetchall()
+
+    finally:
+        connection.close()
+
+    # Restore the saved calibration measurements.
+    concentrations = [
+        float(row[0])
+        for row in standards
+    ]
+
+    absorbances = [
+        float(row[1])
+        for row in standards
+    ]
+
+    if not concentrations:
+        return "No calibration standards found for this experiment.", 400
+
+    # Restore the original regression results.
+    result = {
+        "slope": saved_result[3],
+        "intercept": saved_result[4],
+        "r_squared": saved_result[5],
+        "unknown_concentration": saved_result[7],
+        "minimum_concentration": min(concentrations),
+        "maximum_concentration": max(concentrations)
+    }
+
+    # Prepare the same data format used by the PDF validator.
+    experiment_for_validation = {
+        "unknown_concentration": saved_result[7],
+        "r_squared": saved_result[5]
+    }
+
+    standards_for_validation = [
+        {"concentration": concentration}
+        for concentration in concentrations
+    ]
+
+    # Recalculate scientific warnings from saved data.
+    scientific_warnings = validate_calibration_report(
+        experiment_for_validation,
+        standards_for_validation
+    )
+
+    # Display the saved experiment and its warnings.
+    return render_template(
+        "spectrophotometry_workspace.html",
+        result=result,
+        scientific_warnings=scientific_warnings,
+        concentrations=concentrations,
+        absorbances=absorbances,
+        unknown_absorbance=saved_result[6],
+        experiment_title=saved_result[1],
+        sample_name=saved_result[2],
+        concentration_unit=saved_result[10] or "Unit not recorded",
+        wavelength=saved_result[9]
+    )
+
+
 
 @experiment_planner_bp.route(
     "/experiments/<int:experiment_id>/update",
@@ -2036,22 +2147,56 @@ def analyse_spectrophotometry():
 
         unknown_absorbance = request.form["unknown_absorbance"]
 
+        # STEP 1: Calculate the calibration regression.
         result = analyse_calibration(
             concentrations,
             absorbances,
             unknown_absorbance
         )
 
+        # STEP 2: Prepare the data in the format expected
+        # by the same validator used in the PDF report.
+        experiment_for_validation = {
+            "unknown_concentration": result["unknown_concentration"],
+            "r_squared": result["r_squared"]
+        }
+        standards_for_validation = [
+            {"concentration": concentration}
+            for concentration in concentrations
+        ]
+
+        # STEP 3: Run the scientific validation checks.
+        scientific_warnings = validate_calibration_report(
+            experiment_for_validation,
+            standards_for_validation
+        )
+
+        # STEP 4: Save the analysis to SQLite.
+        result_id = save_spectrophotometry_result(
+            experiment_title=request.form.get("experiment_title", ""),
+            sample_name=request.form.get("sample_name", ""),
+            concentrations=concentrations,
+            absorbances=absorbances,
+            unknown_absorbance=unknown_absorbance,
+            result=result,
+            wavelength=request.form["wavelength"],
+            concentration_unit=request.form["concentration_unit"]
+        )
+
+        # STEP 5: Send results and warnings to the webpage.
         return render_template(
             "spectrophotometry_workspace.html",
             result=result,
+            scientific_warnings=scientific_warnings,
             concentrations=concentrations,
             absorbances=absorbances,
             unknown_absorbance=unknown_absorbance,
             experiment_title=request.form.get("experiment_title", ""),
             sample_name=request.form.get("sample_name", ""),
             wavelength=request.form.get("wavelength", ""),
-            concentration_unit=request.form.get("concentration_unit", "mg/mL")
+            concentration_unit=request.form.get(
+                "concentration_unit", "mg/mL"
+            )
         )
 
     except (ValueError, KeyError) as error:
@@ -2060,5 +2205,101 @@ def analyse_spectrophotometry():
             error=str(error),
             form_data=request.form
         ), 400
+
+
+@experiment_planner_bp.route(
+    "/experiments/spectrophotometry/history"
+)
+def spectrophotometry_history():
+
+    connection = get_connection()
+
+    try:
+        cursor = connection.cursor()
+
+        cursor.execute("""
+            SELECT
+                id,
+                experiment_title,
+                sample_name,
+                wavelength,
+                concentration_unit,
+                unknown_concentration,
+                created_at
+            FROM spectrophotometry_results
+            ORDER BY created_at DESC, id DESC
+        """)
+
+        saved_experiments = cursor.fetchall()
+
+    finally:
+        connection.close()
+
+    return render_template(
+        "spectrophotometry_history.html",
+        saved_experiments=saved_experiments
+    )
+
+
+@experiment_planner_bp.route(
+    "/experiments/spectrophotometry/<int:result_id>/report"
+)
+def download_spectrophotometry_report(result_id):
+
+    connection = get_connection()
+
+    try:
+        connection.row_factory = sqlite3.Row
+        cursor = connection.cursor()
+
+        cursor.execute("""
+            SELECT
+                id,
+                experiment_title,
+                sample_name,
+                slope,
+                intercept,
+                r_squared,
+                unknown_absorbance,
+                unknown_concentration,
+                created_at,
+                wavelength,
+                concentration_unit
+            FROM spectrophotometry_results
+            WHERE id = ?
+        """, (result_id,))
+
+        experiment = cursor.fetchone()
+
+        if experiment is None:
+            return "Spectrophotometry experiment not found.", 404
+
+        cursor.execute("""
+            SELECT concentration, absorbance
+            FROM spectrophotometry_standards
+            WHERE result_id = ?
+            ORDER BY id ASC
+        """, (result_id,))
+
+        standards = cursor.fetchall()
+
+    finally:
+        connection.close()
+
+    if not standards:
+        return "No calibration standards found.", 404
+
+    pdf_output = generate_spectrophotometry_pdf(
+        experiment,
+        standards
+    )
+
+    return send_file(
+        pdf_output,
+        mimetype="application/pdf",
+        as_attachment=True,
+        download_name=f"LabPilot_Spectrophotometry_{result_id}.pdf"
+    )
+
 
 
