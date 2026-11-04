@@ -1,0 +1,246 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/feedback.css') }}"
+>
+
+<div class="feedback-page">
+
+    <div class="feedback-header">
+        <div>
+            <p class="feedback-eyebrow">
+                LABPILOT AI / PRODUCT RESEARCH
+            </p>
+
+            <h1>Help us improve LabPilot AI</h1>
+
+            <p class="feedback-subtitle">
+                Tell us about your experience using our
+                laboratory experiment analysis tools.
+                Your feedback helps us improve accuracy,
+                usability and scientific transparency.
+            </p>
+        </div>
+
+        <div class="feedback-header-icon">
+            &#9998;
+        </div>
+    </div>
+
+    <div class="feedback-layout">
+
+        <div class="feedback-card">
+
+            <div class="feedback-card-heading">
+                <h2>Experiment Feedback</h2>
+                <p>
+                    Complete this short form after testing
+                    one of the three experiments.
+                </p>
+            </div>
+
+            {% with messages = get_flashed_messages(
+                with_categories=true
+            ) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="feedback-alert feedback-alert-{{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form
+                action="{{ url_for('feedback.feedback_form') }}"
+                method="POST"
+                class="feedback-form"
+            >
+
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div class="feedback-field">
+                    <label for="experiment">
+                        Experiment tested
+                        <span>*</span>
+                    </label>
+
+                    <select
+                        id="experiment"
+                        name="experiment"
+                        required
+                    >
+                        <option value="">
+                            Select an experiment
+                        </option>
+
+                        {% for experiment in experiments %}
+                            <option value="{{ experiment }}">
+                                {{ experiment }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="feedback-field">
+                    <label for="user_role">
+                        Your role
+                        <span>*</span>
+                    </label>
+
+                    <select
+                        id="user_role"
+                        name="user_role"
+                        required
+                    >
+                        <option value="">
+                            Select your role
+                        </option>
+
+                        {% for role in user_roles %}
+                            <option value="{{ role }}">
+                                {{ role }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="feedback-field">
+                    <label>
+                        How easy was LabPilot AI to use?
+                        <span>*</span>
+                    </label>
+
+                    <p class="feedback-hint">
+                        1 = Very difficult,
+                        5 = Very easy
+                    </p>
+
+                    <div class="rating-options">
+
+                        {% for rating in range(1, 6) %}
+
+                            <label class="rating-option">
+                                <input
+                                    type="radio"
+                                    name="usability_rating"
+                                    value="{{ rating }}"
+                                    required
+                                >
+
+                                <span>{{ rating }}</span>
+                            </label>
+
+                        {% endfor %}
+
+                    </div>
+                </div>
+
+                <div class="feedback-field">
+                    <label for="what_worked">
+                        What worked well?
+                    </label>
+
+                    <textarea
+                        id="what_worked"
+                        name="what_worked"
+                        rows="4"
+                        maxlength="2000"
+                        placeholder="What did you find useful or easy to understand?"
+                    ></textarea>
+                </div>
+
+                <div class="feedback-field">
+                    <label for="difficulties">
+                        What was difficult or confusing?
+                    </label>
+
+                    <textarea
+                        id="difficulties"
+                        name="difficulties"
+                        rows="4"
+                        maxlength="2000"
+                        placeholder="Describe any problems, unclear results or confusing steps."
+                    ></textarea>
+                </div>
+
+                <div class="feedback-field">
+                    <label for="suggestions">
+                        What should we improve?
+                    </label>
+
+                    <textarea
+                        id="suggestions"
+                        name="suggestions"
+                        rows="4"
+                        maxlength="2000"
+                        placeholder="Suggest a feature, improvement or missing capability."
+                    ></textarea>
+                </div>
+
+                <div class="feedback-privacy">
+                    Please do not include patient information,
+                    confidential laboratory data or personal
+                    contact details.
+                </div>
+
+                <button
+                    type="submit"
+                    class="feedback-submit"
+                >
+                    Submit Feedback
+                </button>
+
+            </form>
+
+        </div>
+
+        <aside class="feedback-info">
+
+            <div class="feedback-info-card">
+
+                <div class="feedback-info-icon">
+                    &#10003;
+                </div>
+
+                <h3>Why your feedback matters</h3>
+
+                <p>
+                    We're developing LabPilot AI to help
+                    laboratories and students analyse
+                    experiments more clearly and consistently.
+                </p>
+
+                <div class="feedback-info-divider"></div>
+
+                <h4>What we're evaluating</h4>
+
+                <ul>
+                    <li>Ease of use</li>
+                    <li>Clarity of calculations</li>
+                    <li>Scientific warnings and explanations</li>
+                    <li>Missing features</li>
+                    <li>Overall user experience</li>
+                </ul>
+
+            </div>
+
+            <div class="feedback-info-card">
+                <h3>Currently supported experiments</h3>
+
+                <p>Serial Dilution &amp; CFU Analysis</p>
+                <p>Antibiotic Susceptibility Testing</p>
+                <p>Spectrophotometry &amp; Calibration</p>
+            </div>
+
+        </aside>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -12,6 +12,7 @@
 <div class="experiment-planner-card">
 
     <form action="/experiments/serial-dilution/save" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
         <input type="hidden" name="area" value="biology">
         <input

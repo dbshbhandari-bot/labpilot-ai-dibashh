@@ -4,3 +4,17 @@ __pycache__/
 .venv/
 venv/
 .idea/
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Local backups
+*.bak

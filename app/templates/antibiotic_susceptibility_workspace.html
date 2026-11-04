@@ -19,6 +19,7 @@
     action="/experiments/ast/save"
     method="POST"
 >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
         <label for="experimentTitle">
             Experiment Title

@@ -18,6 +18,7 @@
         action="/experiments/ast/measurements/{{ measurement[0] }}/update"
         method="POST"
     >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
         <label for="antibiotic">
             Antibiotic Name

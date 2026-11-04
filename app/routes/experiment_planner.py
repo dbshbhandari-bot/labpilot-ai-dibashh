@@ -59,6 +59,113 @@ def start_experiment():
         experiment=experiment
     )
 
+@experiment_planner_bp.route(
+    "/experiments/ast/save",
+    methods=["POST"]
+)
+def save_ast():
+    import math
+
+    experiment_title = request.form.get(
+        "experiment_title", ""
+    ).strip()
+    organism = request.form.get("organism", "").strip()
+    sample_name = request.form.get("sample_name", "").strip()
+    antibiotic = request.form.get("antibiotic", "").strip()
+    notes = request.form.get("notes", "").strip()
+
+    if not all((
+        experiment_title,
+        organism,
+        sample_name,
+        antibiotic
+    )):
+        return "Please complete all required fields.", 400
+
+    try:
+        zone_diameter = float(
+            request.form["zone_diameter"]
+        )
+    except (KeyError, ValueError, TypeError):
+        return "Invalid inhibition zone diameter.", 400
+
+    if not math.isfinite(zone_diameter) or zone_diameter < 0:
+        return "Zone diameter must be a valid non-negative number.", 400
+
+    connection = get_connection()
+
+    try:
+        cursor = connection.cursor()
+
+        # Save the parent experiment with all required fields.
+        cursor.execute("""
+            INSERT INTO experiments (
+                area,
+                experiment,
+                research_question,
+                hypothesis,
+                independent_variable,
+                dependent_variable,
+                controls,
+                notes
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            "biology",
+            "Antibiotic Susceptibility Testing",
+            "",
+            "",
+            "",
+            "",
+            "",
+            notes
+        ))
+
+        experiment_id = cursor.lastrowid
+
+        # Save the first antibiotic measurement.
+        cursor.execute("""
+            INSERT INTO ast_results (
+                experiment_id,
+                experiment_title,
+                organism,
+                sample_name,
+                antibiotic,
+                zone_diameter,
+                replicate_number,
+                notes
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            experiment_id,
+            experiment_title,
+            organism,
+            sample_name,
+            antibiotic,
+            zone_diameter,
+            1,
+            notes
+        ))
+
+        # Save both records together.
+        connection.commit()
+
+    except Exception:
+        connection.rollback()
+        raise
+
+    finally:
+        connection.close()
+
+    return redirect(
+        f"/experiments/ast/{experiment_id}"
+    )
+
+
+
+
+
+
 def save_experiment():
 
     area = request.form.get("area")

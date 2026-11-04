@@ -112,25 +112,25 @@
         Saved laboratory experiment #{{ experiment_id }}
     </p>
 
-<!-- Download AST research report -->
-<div style="margin: 20px 0;">
-    <a
-        href="{{ url_for('experiment_planner.download_ast_report', experiment_id=experiment_id) }}"
-        class="ast-button"
-        style="
-            display: inline-block;
-            padding: 12px 20px;
-            background-color: #17365D;
-            color: white;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-        "
-    >
-        Download PDF Report
-    </a>
-</div>
+    <!-- DOWNLOAD AST RESEARCH REPORT -->
 
+    <div style="margin: 20px 0;">
+        <a
+            href="{{ url_for('experiment_planner.download_ast_report', experiment_id=experiment_id) }}"
+            class="ast-button"
+            style="
+                display: inline-block;
+                padding: 12px 20px;
+                background-color: #17365D;
+                color: white;
+                border-radius: 8px;
+                text-decoration: none;
+                font-weight: 600;
+            "
+        >
+            Download PDF Report
+        </a>
+    </div>
 
     <!-- SAVED AST MEASUREMENTS -->
 
@@ -169,12 +169,16 @@
                     <tr>
                         <td>{{ measurement[4] }}</td>
                         <td>{{ measurement[5] }}</td>
-                        <td>{{ measurement[10] or "Not recorded" }}</td>
+                        <td>
+                            {{ measurement[10] or "Not recorded" }}
+                        </td>
                         <td>{{ measurement[8] }}</td>
-                        <td>{{ measurement[6] or "No notes" }}</td>
+                        <td>
+                            {{ measurement[6] or "No notes" }}
+                        </td>
                         <td>{{ measurement[7] }}</td>
                         <td>
-                            <a href="/experiments/ast/measurements/{{ measurement[0] }}/edit">
+                            <a href="{{ url_for('experiment_planner.edit_ast_measurement', measurement_id=measurement[0]) }}">
                                 Edit
                             </a>
                         </td>
@@ -278,6 +282,13 @@
                 class="ast-form"
             >
 
+                <!-- CSRF PROTECTION: METHODOLOGY -->
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                >
+
                 <label for="testing_method">
                     Testing Method
                 </label>
@@ -291,13 +302,17 @@
                         Select testing method
                     </option>
 
-                    <option value="Disk diffusion"
-                        {% if result[9] == "Disk diffusion" %}selected{% endif %}>
+                    <option
+                        value="Disk diffusion"
+                        {% if result[9] == "Disk diffusion" %}selected{% endif %}
+                    >
                         Disk diffusion
                     </option>
 
-                    <option value="Other"
-                        {% if result[9] == "Other" %}selected{% endif %}>
+                    <option
+                        value="Other"
+                        {% if result[9] == "Other" %}selected{% endif %}
+                    >
                         Other
                     </option>
                 </select>
@@ -354,6 +369,13 @@
                 method="POST"
             >
 
+                <!-- CSRF TOKEN FOR FUTURE ANALYSIS PROTECTION -->
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                >
+
                 <label style="
                     display: flex;
                     gap: 10px;
@@ -401,10 +423,17 @@
         <h2>Add Another Antibiotic</h2>
 
         <form
-            action="/experiments/ast/{{ experiment_id }}/add"
+            action="{{ url_for('experiment_planner.add_ast_antibiotic', experiment_id=experiment_id) }}"
             method="POST"
             class="ast-form"
         >
+
+            <!-- CSRF PROTECTION: ADD ANTIBIOTIC -->
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+            >
 
             <label for="antibiotic">
                 Antibiotic Name
@@ -418,28 +447,19 @@
                 required
             >
 
-          <label for="new_disk_strength">
-           Antibiotic Disk Strength
-          </label>
+            <label for="new_disk_strength">
+                Antibiotic Disk Strength (µg)
+            </label>
 
-         <label for="new_disk_strength">
-         Antibiotic Disk Strength (µg)
-         </label>
-
-          <input
-          type="number"
-         id="new_disk_strength"
-         name="disk_strength"
-         placeholder="e.g. 10"
-         min="0"
-         step="any"
-         required
-        >
-
-
-
-
-
+            <input
+                type="number"
+                id="new_disk_strength"
+                name="disk_strength"
+                placeholder="e.g. 10"
+                min="0"
+                step="any"
+                required
+            >
 
             <label for="zone_diameter">
                 Inhibition Zone Diameter (mm)

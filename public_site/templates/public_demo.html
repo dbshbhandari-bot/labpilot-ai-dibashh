@@ -1,0 +1,1057 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LabPilot AI | Research Workspace</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+:root {
+  --navy:#10233f;
+  --blue:#2563eb;
+  --light:#eff6ff;
+  --bg:#f3f6fb;
+  --border:#dce5f0;
+  --text:#172b49;
+  --muted:#64748b;
+  --green:#047857;
+}
+* {box-sizing:border-box}
+body {
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+button,input,select,textarea {font:inherit}
+a {text-decoration:none;color:inherit}
+button {cursor:pointer}
+.layout {display:flex;min-height:100vh}
+.sidebar {
+  width:245px;
+  background:var(--navy);
+  color:white;
+  padding:25px 17px;
+  flex-shrink:0;
+}
+.brand {font-size:24px;font-weight:800;margin-bottom:8px}
+.version {font-size:11px;color:#93c5fd;margin-bottom:35px}
+.sidebar h4 {
+  color:#94a3b8;
+  font-size:11px;
+  letter-spacing:1px;
+  margin:24px 12px 12px;
+}
+.sidebar a {
+  display:block;
+  padding:13px;
+  border-radius:9px;
+  margin:5px 0;
+  font-size:13px;
+  color:#dbeafe;
+}
+.sidebar a:hover,.sidebar a.active {background:#24466f;color:white}
+.side-note {
+  margin-top:45px;
+  padding:15px;
+  background:#ffffff12;
+  border-radius:10px;
+  font-size:12px;
+  line-height:1.7;
+}
+.workspace {flex:1;min-width:0}
+.topbar {
+  background:white;
+  border-bottom:1px solid var(--border);
+  padding:19px 28px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.topbar strong {font-size:16px}
+.topbar small {color:var(--muted)}
+.content {max-width:1250px;margin:auto;padding:26px}
+.hero {
+  display:grid;
+  grid-template-columns:1.5fr 1fr;
+  background:white;
+  border:1px solid var(--border);
+  border-radius:16px;
+  overflow:hidden;
+  margin-bottom:20px;
+}
+.hero-copy {padding:30px}
+.hero h1 {font-size:27px;margin:12px 0}
+.hero p {color:var(--muted);line-height:1.7}
+.hero img {width:100%;height:260px;object-fit:cover;display:block}
+.tag {
+  display:inline-block;
+  background:#dbeafe;
+  color:#1d4ed8;
+  padding:7px 11px;
+  border-radius:30px;
+  font-size:11px;
+  font-weight:bold;
+}
+.panel {
+  background:white;
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:24px;
+  margin-bottom:19px;
+}
+.panel h2 {font-size:19px;margin:0 0 9px}
+.panel h3 {font-size:15px;margin:20px 0 10px}
+.description {font-size:13px;color:var(--muted);line-height:1.7}
+.grid {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.field label {display:block;font-size:12px;font-weight:700;margin-bottom:7px}
+.field input,.field select,.field textarea {
+  width:100%;
+  padding:11px;
+  border:1px solid #cbd5e1;
+  border-radius:8px;
+  background:white;
+  color:var(--text);
+}
+.field input:focus,.field select:focus {
+  outline:2px solid #bfdbfe;
+  border-color:var(--blue);
+}
+.primary,.secondary,.remove {
+  border:0;
+  border-radius:8px;
+  padding:11px 16px;
+  font-weight:bold;
+  font-size:13px;
+}
+.primary {background:var(--blue);color:white}
+.secondary {background:#e8f0ff;color:#1d4ed8}
+.remove {background:#fee2e2;color:#991b1b}
+.actions {display:flex;gap:10px;flex-wrap:wrap;margin-top:17px}
+.table-scroll {overflow-x:auto}
+table {border-collapse:collapse;width:100%;min-width:650px;margin-top:16px}
+th,td {padding:11px;border-bottom:1px solid var(--border);text-align:left;font-size:12px}
+th {background:#edf3fb;color:#334155}
+td input {width:100%;min-width:75px;padding:9px;border:1px solid #cbd5e1;border-radius:7px}
+td .remove {padding:8px}
+.notice {
+  background:#eff6ff;
+  border-left:4px solid var(--blue);
+  padding:15px;
+  border-radius:6px;
+  margin:15px 0;
+  line-height:1.65;
+  font-size:13px;
+}
+.warning {
+  background:#fff7ed;
+  border-left:4px solid #f59e0b;
+  padding:15px;
+  margin:12px 0;
+  border-radius:6px;
+  line-height:1.6;
+  font-size:13px;
+}
+.metrics {display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin:18px 0}
+.metric {background:#eff6ff;border-radius:10px;padding:17px}
+.metric span {display:block;font-size:12px;color:var(--muted)}
+.metric strong {display:block;font-size:21px;margin-top:9px;overflow-wrap:anywhere}
+.experiment-card {
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:#f8fbff;
+  padding:20px;
+  margin:16px 0;
+}
+.card-head {display:flex;justify-content:space-between;align-items:center;gap:10px}
+.chart-wrap {height:310px;position:relative;margin:18px 0}
+.hidden {display:none!important}
+.stepbar {display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+.step {
+  background:white;
+  border:1px solid var(--border);
+  padding:13px;
+  border-radius:9px;
+  flex:1;
+  min-width:135px;
+  font-size:12px;
+  font-weight:bold;
+}
+.step b {color:var(--blue);margin-right:6px}
+figure {margin:0}
+figcaption {padding:8px 12px;font-size:11px;color:var(--muted);background:#f8fafc}
+.image-note {font-size:12px;color:var(--muted)}
+@media(max-width:900px) {
+  .sidebar {width:190px}
+  .hero {grid-template-columns:1fr}
+  .hero img {height:190px}
+  .grid,.metrics {grid-template-columns:1fr 1fr}
+}
+@media(max-width:650px) {
+  .layout {display:block}
+  .sidebar {width:100%;padding:15px}
+  .sidebar h4,.side-note {display:none}
+  .sidebar a {display:inline-block;padding:9px}
+  .version {margin-bottom:10px}
+  .content {padding:14px}
+  .grid,.metrics {grid-template-columns:1fr}
+  .hero-copy {padding:20px}
+  .panel {padding:17px}
+}
+</style>
+</head>
+
+<body>
+<div class="layout">
+
+<aside class="sidebar">
+  <div class="brand">LabPilot AI</div>
+  <div class="version">PUBLIC LAB WORKSPACE · V3.0</div>
+
+  <h4>NAVIGATION</h4>
+  <a href="/">⌂ Public Homepage</a>
+
+  <h4>LABORATORY EXPERIMENTS</h4>
+  <a id="navSerial" href="/demo/serial-dilution">◉ Serial Dilution & CFU</a>
+  <a id="navAst" href="/demo/ast">◉ Antibiotic Susceptibility</a>
+  <a id="navSpec" href="/demo/spectrophotometry">◉ Spectrophotometry</a>
+
+  <div class="side-note">
+    <strong>Research Prototype</strong>
+    <p>Interactive demonstrations using temporary measurements.</p>
+    <p>Founder: Dibash Bhandari</p>
+  </div>
+</aside>
+
+<div class="workspace">
+
+<header class="topbar">
+  <div>
+    <strong>Laboratory Research Workspace</strong>
+    <br>
+    <small>Experiment management / Measurement analysis</small>
+  </div>
+  <div>
+    <span class="tag">PUBLIC DEMO V3.0</span>
+  </div>
+</header>
+
+<main class="content">
+
+<div class="stepbar">
+  <div class="step"><b>01</b> Experiment setup</div>
+  <div class="step"><b>02</b> Record measurements</div>
+  <div class="step"><b>03</b> Analyse data</div>
+  <div class="step"><b>04</b> Interpret results</div>
+</div>
+
+<div class="hero">
+  <div class="hero-copy">
+    <span class="tag">LABORATORY RESEARCH</span>
+    <h1 id="experimentTitle">Experiment Workspace</h1>
+    <p id="experimentDescription"></p>
+    <p><strong>Workflow:</strong> Configure experiment → Record measurements → Analyse → Review scientific limitations.</p>
+  </div>
+  <figure>
+    <img id="experimentImage"
+      src="https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=1000&q=85"
+      alt="Illustrative laboratory photograph"
+      onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <div style="display:none;padding:30px;background:#dbeafe;color:#1e40af">
+      Laboratory research image unavailable. Check your internet connection.
+    </div>
+    <figcaption>Illustrative laboratory photography — not experimental evidence</figcaption>
+  </figure>
+</div>
+
+<div class="notice">
+  <strong>Public research demonstration.</strong>
+  This interface processes temporary measurements in your browser.
+  It does not access the private LabPilot AI database.
+  Do not enter patient-identifiable or confidential laboratory data.
+  Results are not validated for clinical use.
+</div>
+
+<!-- SERIAL DILUTION -->
+<section id="serialSection" class="hidden">
+
+<div class="panel">
+  <h2>01. Experiment Information</h2>
+  <p class="description">Create a record of the sample and conditions used for the plate-count experiment.</p>
+
+  <div class="grid">
+    <div class="field"><label>Experiment ID</label><input id="cfuRef" value="CFU-2026-001"></div>
+    <div class="field"><label>Sample ID</label><input id="cfuSample" value="ENV-SAMPLE-01"></div>
+    <div class="field"><label>Sample category</label>
+      <select id="cfuCategory">
+        <option>Environmental sample</option>
+        <option>Water sample</option>
+        <option>Food sample</option>
+        <option>Laboratory culture</option>
+      </select>
+    </div>
+    <div class="field"><label>Culture medium</label><input id="cfuMedium" value="Nutrient agar"></div>
+    <div class="field"><label>Incubation temperature (°C)</label><input id="cfuTemp" type="number" value="30"></div>
+    <div class="field"><label>Incubation time (hours)</label><input id="cfuTime" type="number" value="24"></div>
+  </div>
+</div>
+
+<div class="panel">
+  <h2>02. Serial Dilution Plate Measurements</h2>
+  <p class="description">
+    Each row represents an individual agar plate.
+    Enter dilution as its denominator: 1000 represents a 10⁻³ dilution.
+    You can add several plates at the same dilution or across different dilutions.
+  </p>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Plate ID</th>
+          <th>Dilution denominator</th>
+          <th>Plated volume (mL)</th>
+          <th>Colonies counted</th>
+          <th>Remove</th>
+        </tr>
+      </thead>
+      <tbody id="plateBody"></tbody>
+    </table>
+  </div>
+
+  <div class="actions">
+    <button class="secondary" onclick="addPlate()">+ Add Another Plate</button>
+    <button class="primary" onclick="analyseCFU()">Analyse Plate Measurements</button>
+  </div>
+</div>
+
+<div class="panel hidden" id="cfuResultPanel">
+  <h2>03. CFU Analysis Report</h2>
+  <div id="cfuOutput"></div>
+  <div class="chart-wrap"><canvas id="cfuChart"></canvas></div>
+</div>
+</section>
+
+<!-- AST -->
+<section id="astSection" class="hidden">
+
+<div class="panel">
+  <h2>01. Antibiotic Susceptibility Experiment Setup</h2>
+  <p class="description">
+    Record the organism, isolate and testing conditions before entering inhibition-zone measurements.
+  </p>
+
+  <div class="grid">
+    <div class="field"><label>Experiment ID</label><input id="astRef" value="AST-2026-001"></div>
+    <div class="field"><label>Isolate / Sample ID</label><input id="astSample" value="ISOLATE-001"></div>
+    <div class="field"><label>Organism</label><input id="astOrganism" value="Escherichia coli"></div>
+    <div class="field"><label>Method</label><select><option>Disk diffusion</option></select></div>
+    <div class="field"><label>Growth medium</label><input id="astMedium" value="Mueller-Hinton agar"></div>
+    <div class="field"><label>Incubation temperature (°C)</label><input id="astTemp" type="number" value="35"></div>
+  </div>
+
+  <div class="notice">
+    <strong>Measurement guidance:</strong>
+    Record inhibition-zone diameters in millimetres.
+    Include the disk content when available.
+    Multiple measurements allow calculation of mean, sample standard deviation and range.
+  </div>
+</div>
+
+<div class="panel">
+  <h2>02. Antibiotic Measurement Workspace</h2>
+  <p class="description">
+    Create a separate entry for each antibiotic.
+    Add or remove replicate measurements within each entry.
+    You are not restricted to three measurements or one antibiotic.
+  </p>
+
+  <div id="antibioticContainer"></div>
+
+  <div class="actions">
+    <button class="secondary" onclick="addAntibiotic()">+ Add Another Antibiotic</button>
+    <button class="primary" onclick="analyseAST()">Analyse AST Experiment</button>
+  </div>
+</div>
+
+<div class="panel hidden" id="astResultPanel">
+  <h2>03. Antibiotic Susceptibility Measurement Report</h2>
+  <div id="astOutput"></div>
+  <div class="chart-wrap"><canvas id="astChart"></canvas></div>
+</div>
+</section>
+
+<!-- SPECTROPHOTOMETRY -->
+<section id="specSection" class="hidden">
+
+<div class="panel">
+  <h2>01. Spectrophotometry Experiment Setup</h2>
+  <p class="description">
+    Configure the calibration experiment and define the measurement conditions.
+  </p>
+
+  <div class="grid">
+    <div class="field"><label>Experiment ID</label><input id="specRef" value="SPEC-2026-001"></div>
+    <div class="field"><label>Analyte / Substance</label><input id="specAnalyte" value="Example analyte"></div>
+    <div class="field"><label>Wavelength (nm)</label><input id="specWavelength" type="number" value="600"></div>
+    <div class="field"><label>Concentration unit</label><input id="specUnit" value="mg/L"></div>
+    <div class="field"><label>Blank absorbance</label><input id="specBlank" type="number" step="any" value="0"></div>
+    <div class="field"><label>Instrument</label><input id="specInstrument" value="UV-Vis spectrophotometer"></div>
+  </div>
+</div>
+
+<div class="panel">
+  <h2>02. Calibration Standards</h2>
+  <p class="description">
+    Add known concentrations and their corresponding raw absorbance measurements.
+    The system will apply blank correction and calculate the best-fit linear regression.
+  </p>
+
+  <div class="table-scroll">
+    <table>
+      <thead><tr><th>Standard</th><th>Concentration</th><th>Absorbance</th><th>Remove</th></tr></thead>
+      <tbody id="standardBody"></tbody>
+    </table>
+  </div>
+  <div class="actions">
+    <button class="secondary" onclick="addStandard()">+ Add Calibration Standard</button>
+  </div>
+</div>
+
+<div class="panel">
+  <h2>03. Unknown Sample Measurements</h2>
+  <p class="description">
+    Enter absorbance measurements for unknown samples to estimate their concentrations.
+  </p>
+
+  <div class="table-scroll">
+    <table>
+      <thead><tr><th>Sample ID</th><th>Raw absorbance</th><th>Remove</th></tr></thead>
+      <tbody id="unknownBody"></tbody>
+    </table>
+  </div>
+
+  <div class="actions">
+    <button class="secondary" onclick="addUnknown()">+ Add Unknown Sample</button>
+    <button class="primary" onclick="analyseSpectro()">Analyse Calibration & Samples</button>
+  </div>
+</div>
+
+<div class="panel hidden" id="specResultPanel">
+  <h2>04. Calibration Analysis Report</h2>
+  <div id="specOutput"></div>
+  <div class="chart-wrap"><canvas id="specChart"></canvas></div>
+</div>
+</section>
+
+</main>
+</div>
+</div>
+
+<script>
+"use strict";
+
+const experiment = {{ experiment | tojson }};
+const $ = id => document.getElementById(id);
+
+let plateCount=0;
+let antibioticCount=0;
+let standardCount=0;
+let unknownCount=0;
+const charts={};
+
+const esc=value=>String(value).replace(/[&<>"']/g,c=>({
+  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+}[c]));
+
+const fmt=n=>Number.isFinite(n)
+  ?Number(n.toPrecision(5)).toLocaleString("en-GB")
+  :"N/A";
+
+const mean=a=>a.reduce((s,v)=>s+v,0)/a.length;
+
+function sd(a) {
+  if(a.length<2)return null;
+  const m=mean(a);
+  return Math.sqrt(a.reduce((s,v)=>s+(v-m)**2,0)/(a.length-1));
+}
+
+function metric(label,value) {
+  return `<div class="metric"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`;
+}
+
+function reportTable(headings,rows) {
+  return `<div class="table-scroll"><table><thead><tr>
+    ${headings.map(h=>`<th>${esc(h)}</th>`).join("")}
+  </tr></thead><tbody>
+    ${rows.map(row=>`<tr>${row.map(v=>`<td>${esc(v)}</td>`).join("")}</tr>`).join("")}
+  </tbody></table></div>`;
+}
+
+function showReport(panel,output,html) {
+  $(output).innerHTML=html;
+  $(panel).classList.remove("hidden");
+  $(panel).scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function showError(panel,output,message) {
+  showReport(panel,output,
+    `<div class="warning"><strong>Input validation:</strong> ${esc(message)}</div>`);
+}
+
+function drawChart(id,config) {
+  if(charts[id])charts[id].destroy();
+  if(typeof Chart==="undefined") {
+    $(id).parentElement.innerHTML=
+      "<div class='warning'>The chart library did not load. Check your internet connection. Numerical analysis remains available.</div>";
+    return;
+  }
+  charts[id]=new Chart($(id),config);
+}
+
+function addPlate(dilution="",volume="0.1",colonies="") {
+  plateCount++;
+  const tr=document.createElement("tr");
+  tr.innerHTML=`
+    <td><input class="plate-id" value="PLATE-${plateCount}"></td>
+    <td><input class="plate-dilution" type="number" min="1" step="any" value="${dilution}"></td>
+    <td><input class="plate-volume" type="number" min="0.000001" step="any" value="${volume}"></td>
+    <td><input class="plate-colonies" type="number" min="0" step="1" value="${colonies}"></td>
+    <td><button class="remove" onclick="this.closest('tr').remove()">Remove</button></td>`;
+  $("plateBody").appendChild(tr);
+}
+
+function analyseCFU() {
+  const rows=[...$("plateBody").querySelectorAll("tr")];
+  if(!rows.length)return showError("cfuResultPanel","cfuOutput","Add at least one plate.");
+
+  const data=[];
+  for(const row of rows) {
+    const id=row.querySelector(".plate-id").value.trim();
+    const dEl=row.querySelector(".plate-dilution");
+    const vEl=row.querySelector(".plate-volume");
+    const cEl=row.querySelector(".plate-colonies");
+    const d=Number(dEl.value),v=Number(vEl.value),c=Number(cEl.value);
+
+    if(!id||!dEl.value||!vEl.value||!cEl.value||
+       !Number.isFinite(d)||d<1||!Number.isFinite(v)||v<=0||
+       !Number.isInteger(c)||c<0)
+      return showError("cfuResultPanel","cfuOutput",
+        "Complete each plate with an ID, dilution denominator ≥ 1, positive plated volume and non-negative integer colony count.");
+
+    data.push({id,d,v,c,cfu:c*d/v});
+  }
+
+  const countable=data.filter(x=>x.c>=30&&x.c<=300);
+  const chosen=countable.length?countable:data;
+  const avg=mean(chosen.map(x=>x.cfu));
+  const deviation=sd(chosen.map(x=>x.cfu));
+  const warnings=[];
+
+  if(!countable.length)
+    warnings.push("No plate meets the illustrative 30–300 colony screening range. The summary uses all plates and requires cautious interpretation.");
+  if(data.some(x=>x.c>300))
+    warnings.push("One or more plates exceed 300 colonies. Crowding may affect counting reliability.");
+  if(data.some(x=>x.c===0))
+    warnings.push("Zero observed colonies does not establish the complete absence of viable organisms.");
+
+  const table=reportTable(
+    ["Plate","Dilution","Volume (mL)","Colonies","Estimated CFU/mL","Screening"],
+    data.map(x=>[
+      x.id,"1/"+fmt(x.d),fmt(x.v),x.c,fmt(x.cfu),
+      x.c<30?"Below illustrative range":x.c>300?"Above illustrative range":"Within illustrative range"
+    ])
+  );
+
+  showReport("cfuResultPanel","cfuOutput",`
+    <p class="description">Experiment: ${esc($("cfuRef").value)} · Sample: ${esc($("cfuSample").value)}</p>
+    <div class="metrics">
+      ${metric("Plates analysed",data.length)}
+      ${metric("Plates within screening range",countable.length)}
+      ${metric("Mean estimated CFU/mL",fmt(avg))}
+    </div>
+    <h3>Individual plate analysis</h3>
+    ${table}
+    <h3>Scientific interpretation</h3>
+    <div class="notice">
+      <strong>Calculation:</strong> CFU/mL = colonies × dilution denominator ÷ plated volume (mL).
+      Each plate is calculated separately.
+      The displayed mean uses ${countable.length?"plates within the illustrative count range":"all entered plates"}.
+      ${deviation===null?"Only one plate contributed to the mean.":`Sample standard deviation: ${fmt(deviation)} CFU/mL.`}
+      This is a demonstration summary, not a validated method-specific pooled plate-count calculation.
+    </div>
+    ${warnings.map(w=>`<div class="warning">${esc(w)}</div>`).join("")}
+    <p class="description">Colony count suitability depends on the actual laboratory method. These results describe estimated culturable units under the recorded conditions.</p>
+    <h3>Colony count visualisation</h3>
+  `);
+
+  drawChart("cfuChart",{
+    type:"bar",
+    data:{
+      labels:data.map(x=>x.id),
+      datasets:[{
+        label:"Observed colonies",
+        data:data.map(x=>x.c),
+        backgroundColor:"#2563eb"
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      scales:{y:{beginAtZero:true}}
+    }
+  });
+}
+
+function addAntibiotic(name="",values=[null,null,null]) {
+  antibioticCount++;
+  const id=antibioticCount;
+  const card=document.createElement("div");
+  card.className="experiment-card antibiotic-card";
+  card.dataset.id=id;
+
+  card.innerHTML=`
+    <div class="card-head">
+      <h3>Antibiotic ${id}</h3>
+      <button class="remove" onclick="this.closest('.antibiotic-card').remove()">Remove Antibiotic</button>
+    </div>
+
+    <div class="grid">
+      <div class="field">
+        <label>Antibiotic name</label>
+        <input class="antibiotic-name" placeholder="e.g. Ciprofloxacin" value="${esc(name)}">
+      </div>
+      <div class="field">
+        <label>Disk content / potency</label>
+        <input class="antibiotic-potency" placeholder="e.g. 5 µg">
+      </div>
+      <div class="field">
+        <label>Measurement unit</label>
+        <input value="mm" disabled>
+      </div>
+    </div>
+
+    <h3>Replicate measurements</h3>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>Replicate</th><th>Zone diameter (mm)</th><th>Remove</th></tr>
+        </thead>
+        <tbody class="replicate-body"></tbody>
+      </table>
+    </div>
+    <button class="secondary" onclick="addReplicate(${id})">+ Add Replicate</button>
+  `;
+
+  $("antibioticContainer").appendChild(card);
+  values.forEach(v=>addReplicate(id,v));
+}
+
+function addReplicate(id,value=null) {
+  const card=[...document.querySelectorAll(".antibiotic-card")]
+    .find(c=>Number(c.dataset.id)===id);
+  if(!card)return;
+
+  const tbody=card.querySelector(".replicate-body");
+  const tr=document.createElement("tr");
+
+  tr.innerHTML=`
+    <td>Replicate ${tbody.children.length+1}</td>
+    <td><input class="zone-input" type="number" min="0" max="100" step="any"
+      placeholder="Enter diameter" value="${value===null?"":value}"></td>
+    <td><button class="remove" onclick="this.closest('tr').remove()">Remove</button></td>
+  `;
+  tbody.appendChild(tr);
+}
+
+function analyseAST() {
+  const cards=[...document.querySelectorAll(".antibiotic-card")];
+
+  if(!cards.length)
+    return showError("astResultPanel","astOutput","Add at least one antibiotic.");
+
+  if(!$("astOrganism").value.trim()||!$("astSample").value.trim())
+    return showError("astResultPanel","astOutput","Enter an organism and sample identifier.");
+
+  const data=[];
+  const warnings=[];
+
+  for(const card of cards) {
+    const name=card.querySelector(".antibiotic-name").value.trim();
+    const potency=card.querySelector(".antibiotic-potency").value.trim();
+    const inputs=[...card.querySelectorAll(".zone-input")];
+
+    if(!name||!inputs.length||inputs.some(x=>x.value.trim()===""))
+      return showError("astResultPanel","astOutput",
+        "Each antibiotic needs a name and at least one completed replicate measurement.");
+
+    const zones=inputs.map(x=>Number(x.value));
+
+    if(zones.some(x=>!Number.isFinite(x)||x<0||x>100))
+      return showError("astResultPanel","astOutput",
+        "Zone measurements must be between 0 and 100 mm.");
+
+    const m=mean(zones);
+    const deviation=sd(zones);
+    const range=Math.max(...zones)-Math.min(...zones);
+
+    if(zones.length===1)
+      warnings.push(`${name}: only one replicate was entered. Measurement variability cannot be assessed.`);
+    if(range>5)
+      warnings.push(`${name}: replicate range exceeds 5 mm. Review consistency and measurement technique.`);
+    if(zones.some(x=>x===0))
+      warnings.push(`${name}: zero was entered for a zone diameter. Verify how your method records absence of a measurable zone.`);
+
+    data.push({name,potency,zones,m,deviation,range});
+  }
+
+  const largest=[...data].sort((a,b)=>b.m-a.m)[0];
+
+  const table=reportTable(
+    ["Antibiotic","Disk content","Replicates (mm)","Mean (mm)","Sample SD","Range (mm)"],
+    data.map(x=>[
+      x.name,
+      x.potency||"Not entered",
+      x.zones.join(", "),
+      fmt(x.m),
+      x.deviation===null?"N/A":fmt(x.deviation),
+      fmt(x.range)
+    ])
+  );
+
+  showReport("astResultPanel","astOutput",`
+    <p class="description">
+      Organism: ${esc($("astOrganism").value)}
+      · Isolate: ${esc($("astSample").value)}
+    </p>
+
+    <div class="metrics">
+      ${metric("Antibiotics recorded",data.length)}
+      ${metric("Total measurements",data.reduce((s,x)=>s+x.zones.length,0))}
+      ${metric("Largest mean zone",fmt(largest.m)+" mm")}
+    </div>
+
+    <h3>Antibiotic measurement comparison</h3>
+    ${table}
+
+    <h3>Scientific interpretation</h3>
+    <div class="notice">
+      <strong>What the analysis shows:</strong>
+      The mean inhibition zone is calculated separately for each antibiotic.
+      The largest mean recorded in this experiment was
+      <strong>${esc(largest.name)} (${fmt(largest.m)} mm)</strong>.
+      Sample standard deviation describes the spread of replicate measurements.
+      This is a descriptive comparison of recorded zones, not a ranking of antibiotic effectiveness.
+    </div>
+
+    <div class="warning">
+      <strong>Clinical interpretation not performed.</strong>
+      A larger inhibition zone does not automatically indicate that an antibiotic is clinically superior.
+      Susceptible, Intermediate and Resistant classifications require the correct organism,
+      antibiotic, disk content, quality controls and applicable EUCAST or CLSI breakpoints.
+      This demonstration does not implement those validated classifications.
+    </div>
+
+    ${warnings.map(w=>`<div class="warning">${esc(w)}</div>`).join("")}
+
+    <h3>Mean inhibition-zone chart</h3>
+  `);
+
+  drawChart("astChart",{
+    type:"bar",
+    data:{
+      labels:data.map(x=>x.name),
+      datasets:[{
+        label:"Mean inhibition zone (mm)",
+        data:data.map(x=>x.m),
+        backgroundColor:"#2563eb"
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      scales:{
+        y:{
+          beginAtZero:true,
+          title:{display:true,text:"Diameter (mm)"}
+        }
+      }
+    }
+  });
+}
+
+function addStandard(concentration="",absorbance="") {
+  standardCount++;
+  const tr=document.createElement("tr");
+  tr.innerHTML=`
+    <td>STD-${standardCount}</td>
+    <td><input class="std-concentration" type="number" min="0" step="any" value="${concentration}"></td>
+    <td><input class="std-absorbance" type="number" step="any" value="${absorbance}"></td>
+    <td><button class="remove" onclick="this.closest('tr').remove()">Remove</button></td>
+  `;
+  $("standardBody").appendChild(tr);
+}
+
+function addUnknown(name="",absorbance="") {
+  unknownCount++;
+  const tr=document.createElement("tr");
+  tr.innerHTML=`
+    <td><input class="unknown-id" value="${esc(name||"UNKNOWN-"+unknownCount)}"></td>
+    <td><input class="unknown-absorbance" type="number" step="any" value="${absorbance}"></td>
+    <td><button class="remove" onclick="this.closest('tr').remove()">Remove</button></td>
+  `;
+  $("unknownBody").appendChild(tr);
+}
+
+function analyseSpectro() {
+  const rows=[...$("standardBody").querySelectorAll("tr")];
+  const unknownRows=[...$("unknownBody").querySelectorAll("tr")];
+
+  if(rows.length<3)
+    return showError("specResultPanel","specOutput","Enter at least three calibration standards.");
+
+  const blankInput=$("specBlank");
+  const blank=Number(blankInput.value);
+
+  if(blankInput.value.trim()===""||!Number.isFinite(blank))
+    return showError("specResultPanel","specOutput","Enter a valid blank absorbance.");
+
+  const unit=$("specUnit").value.trim()||"concentration units";
+  const standards=[];
+
+  for(const row of rows) {
+    const xEl=row.querySelector(".std-concentration");
+    const yEl=row.querySelector(".std-absorbance");
+
+    if(xEl.value.trim()===""||yEl.value.trim()==="")
+      return showError("specResultPanel","specOutput","Complete every calibration standard.");
+
+    const x=Number(xEl.value);
+    const y=Number(yEl.value)-blank;
+
+    if(!Number.isFinite(x)||x<0||!Number.isFinite(y))
+      return showError("specResultPanel","specOutput","Enter valid standard concentrations and absorbance values.");
+
+    standards.push({x,y});
+  }
+
+  if(new Set(standards.map(p=>p.x)).size<3)
+    return showError("specResultPanel","specOutput","Enter at least three distinct standard concentrations.");
+
+  const xs=standards.map(p=>p.x);
+  const ys=standards.map(p=>p.y);
+  const mx=mean(xs),my=mean(ys);
+
+  const sxx=xs.reduce((s,x)=>s+(x-mx)**2,0);
+  const sxy=standards.reduce((s,p)=>s+(p.x-mx)*(p.y-my),0);
+
+  const slope=sxy/sxx;
+  const intercept=my-slope*mx;
+
+  if(!Number.isFinite(slope)||Math.abs(slope)<1e-12)
+    return showError("specResultPanel","specOutput","The calibration slope is too close to zero to estimate unknown concentrations.");
+
+  const fitted=standards.map(p=>slope*p.x+intercept);
+  const sse=standards.reduce((s,p,i)=>s+(p.y-fitted[i])**2,0);
+  const sst=ys.reduce((s,y)=>s+(y-my)**2,0);
+  const r2=sst>0?1-sse/sst:null;
+
+  const minX=Math.min(...xs);
+  const maxX=Math.max(...xs);
+  const unknowns=[];
+
+  for(const row of unknownRows) {
+    const name=row.querySelector(".unknown-id").value.trim();
+    const input=row.querySelector(".unknown-absorbance");
+
+    if(!name||input.value.trim()==="")
+      return showError("specResultPanel","specOutput","Complete every unknown sample.");
+
+    const corrected=Number(input.value)-blank;
+    if(!Number.isFinite(corrected))
+      return showError("specResultPanel","specOutput","Enter valid unknown absorbance measurements.");
+
+    const concentration=(corrected-intercept)/slope;
+
+    unknowns.push({
+      name,
+      corrected,
+      concentration,
+      outside:concentration<minX||concentration>maxX
+    });
+  }
+
+  const warnings=[];
+
+  if(slope<=0)
+    warnings.push("The fitted slope is not positive. Check whether that is expected for this assay.");
+  if(r2===null)
+    warnings.push("R² is undefined because the corrected standard absorbances have no variation.");
+  else if(r2<0.98)
+    warnings.push("R² is below the illustrative 0.98 screening threshold. This is not a validated assay acceptance criterion.");
+  if(unknowns.some(x=>x.outside))
+    warnings.push("One or more unknown samples require extrapolation beyond the entered calibration range.");
+  if(unknowns.some(x=>x.concentration<0))
+    warnings.push("One or more calculated concentrations are negative. Review blank correction and calibration suitability.");
+
+  const standardsTable=reportTable(
+    ["Concentration ("+unit+")","Corrected absorbance","Fitted absorbance","Residual"],
+    standards.map((p,i)=>[
+      fmt(p.x),fmt(p.y),fmt(fitted[i]),fmt(p.y-fitted[i])
+    ])
+  );
+
+  const unknownTable=reportTable(
+    ["Sample","Corrected absorbance","Estimated concentration ("+unit+")","Status"],
+    unknowns.map(x=>[
+      x.name,
+      fmt(x.corrected),
+      fmt(x.concentration),
+      x.outside?"Outside calibration range":"Within calibration range"
+    ])
+  );
+
+  showReport("specResultPanel","specOutput",`
+    <p class="description">
+      Analyte: ${esc($("specAnalyte").value)}
+      · Wavelength: ${esc($("specWavelength").value)} nm
+    </p>
+
+    <div class="metrics">
+      ${metric("Regression slope",fmt(slope))}
+      ${metric("Intercept",fmt(intercept))}
+      ${metric("R²",r2===null?"Undefined":fmt(r2))}
+    </div>
+
+    <h3>Calibration standards</h3>
+    ${standardsTable}
+
+    <h3>Unknown sample estimates</h3>
+    ${unknownTable}
+
+    <h3>Scientific interpretation</h3>
+    <div class="notice">
+      <strong>Regression equation:</strong>
+      corrected absorbance = slope × concentration + intercept.
+      The system estimates unknown concentration by rearranging this equation.
+      R² measures how much variation in the calibration measurements is explained by the fitted line.
+      A high R² does not, by itself, prove that the method is accurate or validated.
+    </div>
+
+    ${warnings.map(w=>`<div class="warning">${esc(w)}</div>`).join("")}
+
+    <div class="warning">
+      <strong>Method limitations:</strong>
+      This prototype does not verify reference standard traceability,
+      instrument calibration, detection limits, assay-specific linearity,
+      replicate precision or measurement uncertainty.
+    </div>
+
+    <h3>Calibration curve</h3>
+  `);
+
+  drawChart("specChart",{
+    type:"scatter",
+    data:{
+      datasets:[
+        {
+          label:"Measured standards",
+          data:standards.map(p=>({x:p.x,y:p.y})),
+          backgroundColor:"#2563eb",
+          pointRadius:6
+        },
+        {
+          label:"Fitted regression line",
+          type:"line",
+          data:[
+            {x:minX,y:slope*minX+intercept},
+            {x:maxX,y:slope*maxX+intercept}
+          ],
+          borderColor:"#059669",
+          pointRadius:0,
+          fill:false
+        }
+      ]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      scales:{
+        x:{
+          type:"linear",
+          title:{display:true,text:"Concentration ("+unit+")"}
+        },
+        y:{
+          title:{display:true,text:"Blank-corrected absorbance"}
+        }
+      }
+    }
+  });
+}
+
+function initialise() {
+  const pages={
+    serial:{
+      title:"Serial Dilution & CFU Analysis",
+      description:"Create a laboratory plate-count experiment, record multiple dilution levels, analyse colony measurements and review the scientific interpretation.",
+      section:"serialSection",
+      nav:"navSerial",
+      image:"https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=1000&q=85"
+    },
+    ast:{
+      title:"Antibiotic Susceptibility Testing",
+      description:"Record organism details, multiple antibiotic disks and replicate inhibition-zone measurements. Compare the resulting measurement statistics and review quality warnings.",
+      section:"astSection",
+      nav:"navAst",
+      image:"https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=1000&q=85"
+    },
+    spectro:{
+      title:"Spectrophotometry & Calibration",
+      description:"Construct a multi-point calibration curve, evaluate regression quality and estimate unknown sample concentrations from measured absorbance.",
+      section:"specSection",
+      nav:"navSpec",
+      image:"https://images.unsplash.com/photo-1581093458791-9d42e3c1f4a0?auto=format&fit=crop&w=1000&q=85"
+    }
+  };
+
+  const page=pages[experiment];
+
+  if(!page) {
+    $("experimentTitle").textContent="Experiment unavailable";
+    $("experimentDescription").textContent="Choose an experiment from the sidebar.";
+    return;
+  }
+
+  $("experimentTitle").textContent=page.title;
+  $("experimentDescription").textContent=page.description;
+  $("experimentImage").src=page.image;
+  $(page.section).classList.remove("hidden");
+  $(page.nav).classList.add("active");
+
+  if(experiment==="serial") {
+    addPlate(1000,0.1,82);
+    addPlate(1000,0.1,91);
+    addPlate(10000,0.1,12);
+  }
+
+  if(experiment==="ast") {
+    addAntibiotic("Ciprofloxacin",[18,20,19]);
+    addAntibiotic("Amoxicillin",[12,13,11]);
+  }
+
+  if(experiment==="spectro") {
+    [[0,0.02],[2,0.18],[4,0.35],[6,0.51],[8,0.69]]
+      .forEach(p=>addStandard(p[0],p[1]));
+    addUnknown("UNKNOWN-01",0.42);
+    addUnknown("UNKNOWN-02",0.62);
+  }
+}
+
+initialise();
+</script>
+</body>
+</html>
