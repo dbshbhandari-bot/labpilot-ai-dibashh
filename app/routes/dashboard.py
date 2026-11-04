@@ -42,6 +42,18 @@ def dashboard():
 
         ast_count = cursor.fetchone()[0]
 
+        # Number of saved Spectrophotometry experiments
+        cursor.execute("""
+            SELECT COUNT(*)
+            FROM spectrophotometry_results
+        """)
+
+        spectrophotometry_count = cursor.fetchone()[0]
+
+        # Include Spectrophotometry in the overall total.
+        total_experiments += spectrophotometry_count
+
+
         # Retrieve the five most recent experiments
         cursor.execute("""
             SELECT
@@ -108,6 +120,7 @@ def dashboard():
         total_experiments=total_experiments,
         serial_dilution_count=serial_dilution_count,
         ast_count=ast_count,
+        spectrophotometry_count=spectrophotometry_count,
         recent_experiments=recent_experiments,
         activity_labels=activity_labels,
         activity_counts=activity_counts

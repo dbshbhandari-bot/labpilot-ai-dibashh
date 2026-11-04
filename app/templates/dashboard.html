@@ -16,7 +16,6 @@
 
     <div class="dashboard-card">
         <div class="card-icon blue">🧪</div>
-
         <div>
             <p class="card-label">Total Experiments</p>
             <h2>{{ total_experiments }}</h2>
@@ -26,7 +25,6 @@
 
     <div class="dashboard-card">
         <div class="card-icon green">✓</div>
-
         <div>
             <p class="card-label">Serial Dilution</p>
             <h2>{{ serial_dilution_count }}</h2>
@@ -36,7 +34,6 @@
 
     <div class="dashboard-card">
         <div class="card-icon purple">🦠</div>
-
         <div>
             <p class="card-label">AST Experiments</p>
             <h2>{{ ast_count }}</h2>
@@ -45,12 +42,11 @@
     </div>
 
     <div class="dashboard-card">
-        <div class="card-icon orange">📋</div>
-
+        <div class="card-icon orange">🔬</div>
         <div>
-            <p class="card-label">Recent Records</p>
-            <h2>{{ recent_experiments|length }}</h2>
-            <span>Latest saved experiments (up to 5)</span>
+            <p class="card-label">Spectrophotometry</p>
+            <h2>{{ spectrophotometry_count }}</h2>
+            <span>Calibration analysis experiments</span>
         </div>
     </div>
 
@@ -78,13 +74,9 @@
                 <div class="experiment-row">
 
                     <div>
-                        <strong>
-                            {{ experiment[1] }}
-                        </strong>
+                        <strong>{{ experiment[1] }}</strong>
 
-                        <p>
-                            Experiment #{{ experiment[0] }}
-                        </p>
+                        <p>Experiment #{{ experiment[0] }}</p>
 
                         <small>
                             Created: {{ experiment[3] }}
@@ -128,22 +120,34 @@
     </div>
 
 
-    <!-- WORKING QUICK ACTIONS -->
+    <!-- QUICK ACTIONS -->
 
     <div class="quick-actions">
 
         <h2>Quick Actions</h2>
 
         <a href="{{ url_for('experiment_planner.experiment_planner') }}">
-            <button type="button">Plan New Experiment</button>
+            <button type="button">
+                Plan New Experiment
+            </button>
         </a>
 
         <a href="{{ url_for('experiment_planner.my_experiments') }}">
-            <button type="button">My Experiments</button>
+            <button type="button">
+                My Experiments
+            </button>
         </a>
 
         <a href="{{ url_for('experiment_planner.serial_dilution_calculator') }}">
-            <button type="button">CFU Calculator</button>
+            <button type="button">
+                CFU Calculator
+            </button>
+        </a>
+
+        <a href="{{ url_for('experiment_planner.spectrophotometry_history') }}">
+            <button type="button">
+                Spectrophotometry History
+            </button>
         </a>
 
     </div>
@@ -156,19 +160,13 @@
 <div class="chart-section">
 
     <div class="chart-card">
-
         <h2>Recent Experiment Activity</h2>
-
         <canvas id="experimentChart"></canvas>
-
     </div>
 
     <div class="chart-card">
-
         <h2>Experiment Distribution</h2>
-
         <canvas id="categoryChart"></canvas>
-
     </div>
 
 </div>
@@ -176,7 +174,7 @@
 
 <script>
 
-    // Actual experiment activity from SQLite.
+    // Seven-day activity data supplied by Flask.
     const activityLabels = {{ activity_labels | tojson }};
     const activityData = {{ activity_counts | tojson }};
 
@@ -219,20 +217,20 @@
         }
     );
 
-    // Real experiment categories from SQLite
-    const categoryLabels = [
-        "Serial Dilution",
-        "AST Experiments",
-        "Other Experiments"
-    ];
+
+    // Experiment distribution across the three modules.
 
     const totalExperiments = {{ total_experiments | tojson }};
     const serialDilutionCount = {{ serial_dilution_count | tojson }};
     const astCount = {{ ast_count | tojson }};
+    const spectrophotometryCount = {{ spectrophotometry_count | tojson }};
 
     const otherCount = Math.max(
         0,
-        totalExperiments - serialDilutionCount - astCount
+        totalExperiments
+        - serialDilutionCount
+        - astCount
+        - spectrophotometryCount
     );
 
     const categoryChart = new Chart(
@@ -241,18 +239,25 @@
             type: "doughnut",
 
             data: {
-                labels: categoryLabels,
+                labels: [
+                    "Serial Dilution",
+                    "AST Experiments",
+                    "Spectrophotometry",
+                    "Other Experiments"
+                ],
 
                 datasets: [{
                     data: [
                         serialDilutionCount,
                         astCount,
+                        spectrophotometryCount,
                         otherCount
                     ],
 
                     backgroundColor: [
                         "#2563eb",
                         "#16a34a",
+                        "#f97316",
                         "#9333ea"
                     ]
                 }]
