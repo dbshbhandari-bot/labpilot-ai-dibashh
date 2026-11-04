@@ -171,6 +171,31 @@
             color: #dbe7fa;
         }
 
+          .feedback-button {
+          display: inline-block;
+          padding: 14px 30px;
+          background: #ffffff;
+          color: #163b75;
+          border-radius: 9px;
+         font-size: 15px;
+         font-weight: 700;
+         text-decoration: none;
+         transition: background 0.2s, transform 0.2s;
+         }
+
+         .feedback-button:hover {
+         background: #e8f1ff;
+         transform: translateY(-2px);
+         }
+
+         .feedback-button:focus-visible {
+         outline: 3px solid #ffffff;
+         outline-offset: 4px;
+         }
+
+
+
+
         footer {
             text-align: center;
             padding: 30px;
@@ -341,10 +366,18 @@
             professionals as we develop the platform.
         </p>
 
-        <p>
-            The public demonstrations are available
-            above. Our feedback form is being prepared.
-        </p>
+         <p>
+             Have you tested one of our experiments?
+             Tell us what worked, what was confusing,
+             and what we should improve next.
+          </p>
+
+          <a href="/feedback" class="feedback-button">
+           Give Feedback &rarr;
+          </a>
+
+
+
 
     </section>
 

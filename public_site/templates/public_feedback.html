@@ -1,0 +1,367 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Research | LabPilot AI</title>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f6f8fc;
+            color: #17233b;
+            line-height: 1.6;
+        }
+
+        .navbar {
+            background: white;
+            border-bottom: 1px solid #e3e8f0;
+            padding: 20px 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .brand {
+            font-size: 23px;
+            font-weight: 800;
+            color: #163b75;
+            text-decoration: none;
+        }
+
+        .nav-link {
+            color: #2463c5;
+            font-size: 14px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #edf4ff, #ffffff);
+            padding: 65px 8%;
+            text-align: center;
+        }
+
+        .eyebrow {
+            color: #2463c5;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        h1 {
+            font-size: clamp(32px, 5vw, 46px);
+            line-height: 1.2;
+            margin: 18px auto;
+        }
+
+        .hero p {
+            color: #63718a;
+            max-width: 700px;
+            margin: auto;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 45px auto;
+            padding: 0 20px;
+        }
+
+        .panel {
+            background: white;
+            border: 1px solid #e3e8f0;
+            border-radius: 14px;
+            padding: 35px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.03);
+            margin-bottom: 25px;
+        }
+
+        .panel h2 {
+            color: #163b75;
+            margin-top: 0;
+        }
+
+        .intro {
+            color: #63718a;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+
+        .field {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        select, textarea {
+            width: 100%;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 13px;
+            font: inherit;
+            background: white;
+            color: #17233b;
+        }
+
+        select:focus, textarea:focus {
+            outline: 2px solid #2463c5;
+            outline-offset: 1px;
+        }
+
+        textarea {
+            min-height: 105px;
+            resize: vertical;
+        }
+
+        .hint {
+            color: #63718a;
+            font-size: 13px;
+            margin: 0 0 12px;
+        }
+
+        .rating {
+            display: flex;
+            gap: 10px;
+        }
+
+        .rating label {
+            flex: 1;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .rating input {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .rating span {
+            display: block;
+            text-align: center;
+            padding: 13px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: #f6f8fc;
+        }
+
+        .rating input:checked + span {
+            background: #163b75;
+            border-color: #163b75;
+            color: white;
+        }
+
+        .rating input:focus-visible + span {
+            outline: 3px solid #2463c5;
+            outline-offset: 2px;
+        }
+
+        .notice {
+            background: #edf4ff;
+            border-radius: 8px;
+            padding: 15px;
+            color: #405574;
+            font-size: 13px;
+            margin-bottom: 22px;
+        }
+
+        button {
+            background: #163b75;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 15px 28px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #2463c5;
+        }
+
+        .list {
+            color: #405574;
+            padding-left: 22px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #63718a;
+            font-size: 13px;
+        }
+
+        @media (max-width: 600px) {
+            .navbar { padding: 18px 5%; }
+            .panel { padding: 22px; }
+            .rating { gap: 5px; }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="navbar">
+    <a href="/" class="brand">LabPilot AI</a>
+    <a href="/" class="nav-link">← Back to Home</a>
+</header>
+
+<section class="hero">
+    <div class="eyebrow">LABPILOT AI / PRODUCT RESEARCH</div>
+    <h1>Help us improve LabPilot AI</h1>
+    <p>
+        Tell us about your experience using our laboratory
+        experiment analysis tools. Your feedback helps us
+        improve accuracy, usability and scientific transparency.
+    </p>
+</section>
+
+<main class="container">
+
+    <section class="panel">
+        <h2>✎ Experiment Feedback</h2>
+        <p class="intro">
+            Complete this short form after testing one of
+            the three experiments.
+        </p>
+
+        <form action="/feedback" method="POST">
+
+            <div class="field">
+                <label for="experiment">Experiment tested *</label>
+                <select id="experiment" name="experiment" required>
+                    <option value="">Select an experiment</option>
+                    <option value="serial_dilution">
+                        Serial Dilution &amp; CFU
+                    </option>
+                    <option value="ast">
+                        Antibiotic Susceptibility (AST)
+                    </option>
+                    <option value="spectrophotometry">
+                        Spectrophotometry
+                    </option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="role">Your role *</label>
+                <select id="role" name="role" required>
+                    <option value="">Select your role</option>
+                    <option value="student">Student</option>
+                    <option value="lecturer">Lecturer</option>
+                    <option value="researcher">Researcher</option>
+                    <option value="lab_professional">
+                        Laboratory Professional
+                    </option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label>How easy was LabPilot AI to use? *</label>
+                <p class="hint">
+                    1 = Very difficult, 5 = Very easy
+                </p>
+
+                <div class="rating">
+                    <label>
+                        <input type="radio" name="ease" value="1" required>
+                        <span>1</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="ease" value="2">
+                        <span>2</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="ease" value="3">
+                        <span>3</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="ease" value="4">
+                        <span>4</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="ease" value="5">
+                        <span>5</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="worked">What worked well?</label>
+                <textarea id="worked" name="worked"
+                    maxlength="2000"
+                    placeholder="Which features did you find useful?"></textarea>
+            </div>
+
+            <div class="field">
+                <label for="difficult">
+                    What was difficult or confusing?
+                </label>
+                <textarea id="difficult" name="difficult"
+                    maxlength="2000"
+                    placeholder="Describe any problems or confusing steps."></textarea>
+            </div>
+
+            <div class="field">
+                <label for="improve">What should we improve?</label>
+                <textarea id="improve" name="improve"
+                    maxlength="2000"
+                    placeholder="Suggest improvements or missing features."></textarea>
+            </div>
+
+            <div class="notice">
+                Please do not include patient information,
+                confidential laboratory data or personal
+                contact details.
+            </div>
+
+            <button type="submit">Submit Feedback →</button>
+
+        </form>
+    </section>
+
+    <section class="panel">
+        <h2>✓ Why your feedback matters</h2>
+        <p>
+            We're developing LabPilot AI to help laboratories
+            and students analyse experiments more clearly
+            and consistently.
+        </p>
+
+        <h3>What we're evaluating</h3>
+        <ul class="list">
+            <li>Ease of use</li>
+            <li>Clarity of calculations</li>
+            <li>Scientific warnings and explanations</li>
+            <li>Missing features</li>
+            <li>Overall user experience</li>
+        </ul>
+
+        <h3>Currently supported experiments</h3>
+        <ul class="list">
+            <li>Serial Dilution &amp; CFU Analysis</li>
+            <li>Antibiotic Susceptibility Testing</li>
+            <li>Spectrophotometry &amp; Calibration</li>
+        </ul>
+    </section>
+
+</main>
+
+<footer>
+    LabPilot AI — Early-stage research prototype.
+    Not intended for clinical diagnosis or treatment decisions.
+</footer>
+
+</body>
+</html>
