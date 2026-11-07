@@ -1,0 +1,352 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Customer Feedback | LabPilot AI</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #f4f7fc;
+            color: #17233b;
+            font-family: Arial, sans-serif;
+        }
+
+        header {
+            background: #163b75;
+            color: white;
+            padding: 22px 6%;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .brand {
+            font-size: 23px;
+            font-weight: bold;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .private-label {
+            font-size: 12px;
+            opacity: 0.85;
+        }
+
+        .logout-form {
+            margin: 0;
+        }
+
+        .logout-button {
+            background: white;
+            color: #163b75;
+            border: 1px solid white;
+            border-radius: 8px;
+            padding: 10px 18px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .logout-button:hover {
+            background: #e9f1ff;
+        }
+
+        .logout-button:focus-visible {
+            outline: 3px solid #93c5fd;
+            outline-offset: 3px;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+        h1 {
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #65748b;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns:
+                repeat(auto-fit, minmax(200px, 1fr));
+            gap: 18px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid #e0e7f0;
+        }
+
+        .stat-label {
+            color: #65748b;
+            font-size: 14px;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #163b75;
+            margin-top: 10px;
+        }
+
+        .feedback-card {
+            background: white;
+            border: 1px solid #e0e7f0;
+            border-radius: 12px;
+            padding: 26px;
+            margin-bottom: 20px;
+        }
+
+        .feedback-heading {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .experiment {
+            font-size: 19px;
+            font-weight: bold;
+            text-transform: capitalize;
+        }
+
+        .rating {
+            background: #e9f1ff;
+            color: #163b75;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .metadata {
+            color: #65748b;
+            font-size: 13px;
+            margin-bottom: 22px;
+            line-height: 1.8;
+        }
+
+        .feedback-section {
+            margin-top: 18px;
+        }
+
+        .feedback-section h3 {
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #163b75;
+        }
+
+        .feedback-section p {
+            margin: 0;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        .empty-state {
+            background: white;
+            padding: 45px 20px;
+            text-align: center;
+            border-radius: 12px;
+            color: #65748b;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #65748b;
+            font-size: 12px;
+        }
+
+        @media (max-width: 600px) {
+            .header-content {
+                align-items: flex-start;
+            }
+
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .feedback-card {
+                padding: 18px;
+            }
+
+            .stat-number {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="header-content">
+        <div class="brand">LabPilot AI</div>
+
+        <div class="header-actions">
+            <div class="private-label">
+                Private Founder Dashboard
+            </div>
+
+            <form
+                class="logout-form"
+                method="POST"
+                action="{{ url_for('founder_logout') }}"
+            >
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ logout_csrf_token }}"
+                >
+
+                <button
+                    class="logout-button"
+                    type="submit"
+                >
+                    Log Out
+                </button>
+            </form>
+        </div>
+    </div>
+</header>
+
+<main>
+    <h1>Customer Feedback Dashboard</h1>
+
+    <p class="subtitle">
+        Review original customer feedback, usability ratings,
+        research suggestions and submission timestamps.
+        All times are displayed in UK local time.
+    </p>
+
+    <section class="stats">
+        <div class="stat-card">
+            <div class="stat-label">
+                Total Feedback Submissions
+            </div>
+
+            <div class="stat-number">
+                {{ feedback_records|length }}
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">
+                Average Ease-of-Use Rating
+            </div>
+
+            <div class="stat-number">
+                {% if feedback_records %}
+                    {{ "%.1f"|format(
+                        (feedback_records|sum(attribute=3))
+                        / (feedback_records|length)
+                    ) }}/5
+                {% else %}
+                    N/A
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <h2>Feedback Submissions</h2>
+
+    {% if feedback_records %}
+
+        {% for record in feedback_records %}
+
+        <article class="feedback-card">
+
+            <div class="feedback-heading">
+                <div class="experiment">
+                    {{ record[1]|replace("_", " ") }}
+                </div>
+
+                <div class="rating">
+                    {{ record[3] }}/5
+                </div>
+            </div>
+
+            <div class="metadata">
+                Feedback ID: #{{ record[0] }}
+                <br>
+
+                User Role:
+                {{ record[2]|replace("_", " ") }}
+                <br>
+
+                Date:
+                {{ record[7].strftime("%d %B %Y") }}
+                <br>
+
+                Time:
+                {{ record[7].strftime("%I:%M:%S %p") }}
+                (UK)
+            </div>
+
+            <div class="feedback-section">
+                <h3>What Worked Well</h3>
+                <p>{{ record[4] or "Not provided" }}</p>
+            </div>
+
+            <div class="feedback-section">
+                <h3>Difficulties Experienced</h3>
+                <p>{{ record[5] or "Not provided" }}</p>
+            </div>
+
+            <div class="feedback-section">
+                <h3>Suggested Improvements</h3>
+                <p>{{ record[6] or "Not provided" }}</p>
+            </div>
+
+        </article>
+
+        {% endfor %}
+
+    {% else %}
+
+        <div class="empty-state">
+            No customer feedback has been submitted yet.
+        </div>
+
+    {% endif %}
+</main>
+
+<footer>
+    LabPilot AI · Private Customer Validation Records
+</footer>
+
+</body>
+</html>
