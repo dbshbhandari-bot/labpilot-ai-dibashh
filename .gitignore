@@ -18,3 +18,5 @@ venv/
 
 # Local backups
 *.bak
+# Private customer feedback and endorsement evidence
+evidence/
